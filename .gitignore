@@ -1,0 +1,18 @@
+PSD
+yarn-error.log
+.nyc_output
+coverage
+tmp
+public/
+logs/
+node_modules/
+bower_components/
+.idea/
+errors.log
+stats.json
+words.txt
+.DS_Store
+#mongod.conf
+#mongod.development.conf
+npm-debug.log
+.bash_history deleted
