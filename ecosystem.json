@@ -29,7 +29,7 @@
       "user" : "root",
       "host" : [
         {
-          "host": "origin/master",
+          "host": "188.225.32.111",
           "port": "22"
         }
       ],
