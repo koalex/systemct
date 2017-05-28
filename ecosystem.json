@@ -33,8 +33,9 @@
           "port": "22"
         }
       ],
+      "key": "/root/.ssh/id_rsa.pub",
       "ref"  : "origin/master",
-      "repo" : "https://koalex@github.com/koalex/systemct.git",
+      "repo" : "https://github.com/koalex/systemct.git",
       "path" : "/root/systemct",
       "post-deploy" : ". ~/.nvm/nvm.sh && . ~/.profile && . ~/.bashrc && nvm use 7* && yarn install --ignore-engines && webpack --json --profile >stats.json && pm2 startOrReload ecosystem.json --env production && pm2 save"
     }
