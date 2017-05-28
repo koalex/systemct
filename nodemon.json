@@ -1,0 +1,24 @@
+{
+  "verbose": true,
+  "watch": [
+    "server.js",
+    "config/",
+    "handlers/",
+    "libs/",
+    "middlewares/",
+    "modules/"
+  ],
+  "ignore": [
+    ".git",
+    "node_modules/",
+    "public/",
+    "node_modules/**/node_modules"
+  ],
+  "execMap": {
+    "js": "node --harmony"
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "NODEMON": "true"
+  }
+}

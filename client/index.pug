@@ -1,0 +1,112 @@
+doctype html
+if userAgent.isIE
+    <!--[if lte IE 9]>
+    html.no-js.lte-ie9
+    <![endif]-->
+    <!--[if !(IE)]><!-->
+html.no-js
+    if userAgent.isIE
+        <!--<![endif]-->
+    head
+        meta(charset='utf-8')
+        title=PAGE_TTILE
+        if favicons
+            each val, index in favicons.html
+                !=val
+        script document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+        meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no, ya-title=fade, ya-dock=fade')
+
+        //- https://github.com/kudago/smart-app-banner
+        meta(name='apple-itunes-app' content='app-id=myAppStoreID, affiliate-data=myAffiliateData, app-argument=myURL')
+        meta(name='google-play-app' content='app-id=com.package.android')
+        if userAgent.source.match(/IEMobile\/10\.0/)
+            style
+                | @-ms-viewport{width:auto!important}
+            script.
+                if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
+                    var msViewportStyle = document.createElement('style')
+                    msViewportStyle.appendChild(document.createTextNode('@-ms-viewport{width:auto!important}'));
+                    document.querySelector('head').appendChild(msViewportStyle)
+                }
+        if userAgent.isMobile
+            <!--[if IEMobile]>
+            meta(http-equiv='cleartype' content='on')
+            <![endif]-->
+            meta(name='HandheldFriendly' content='True')
+
+        //- WEBPACK ENTRY POINTS
+        if assets &&  assets.common
+            if assets.common.css
+                link(rel='stylesheet' type='text/css' href=''+assets.common.css)
+            if assets.common.js
+                script(src='' + assets.common.js defer)
+        if assets &&  assets.index
+            if assets.index.css
+                link(rel='stylesheet' type='text/css' href=''+assets.index.css)
+            if assets.index.js
+                script(src='' + assets.index.js defer)
+
+        meta(name='DC.title' content=''+PAGE_TTILE)
+        meta(name='msapplication-tap-highlight' content='no')
+        meta(name='msapplication-starturl' content=''+homepage)
+        meta(name='application-name' content=''+appName)
+        meta(name='msapplication-tooltip' content=''+APP_DESCRIPTION)
+        meta(name='description' content=''+APP_DESCRIPTION)
+        meta(name='apple-mobile-web-app-capable' content='yes')
+        meta(name='apple-mobile-web-app-status-bar-style' content='black')
+        meta(name='google' content='notranslate')
+        meta(name='theme-color' content='#282d33')
+        meta(name='SKYPE_TOOLBAR' content='SKYPE_TOOLBAR_PARSER_COMPATIBLE')
+        meta(name='format-detection' content='telephone=no')
+        meta(name='format-detection' content='address=no')
+        meta(name='dcterms.rightsHolder' content='© '+COPYRIGHT)
+        meta(name='COPYRIGHT' content='© '+COPYRIGHT)
+        //- Метатег Author и Copyright не используются одновременно - https://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D1%82%D0%B0%D1%82%D0%B5%D0%B3%D0%B8#.D0.9C.D0.B5.D1.82.D0.B0.D1.82.D0.B5.D0.B3_Author_.D0.B8_Copyright
+            meta(name='author' content=''+author)
+            meta(name='DC.creator' content=''+author)
+        meta(name='twitter:card' content='summary')
+        meta(name='twitter:site' content=''+homepage)
+        meta(name='twitter:title' content=''+PAGE_TTILE)
+        meta(name='twitter:description' content=''+APP_DESCRIPTION)
+
+        //- FIXME
+        meta(name='twitter:creator' content='@systemct')
+        meta(name='twitter:domain' content=''+homepage)
+        //- For each page url of page
+        meta(name='twitter:url' content=''+homepage)
+        //- FIXME: og:image must be 1200x630 3) twitter:image:src must be min
+        meta(property='og:image' content='/assets/favicons/logo.pngapple-touch-startup-image-1242x2148.png')
+
+        //- FIXME: image_src must be 100x100
+        link(rel='image_src' href='/assets/favicons/logo.pngapple-touch-icon-114x114.png')
+
+        //- FIXME: twitter:image:src must be at least 280x150, --> twitter:image:width twitter:image:height
+        meta(name='twitter:image:src' content='/assets/favicons/logo.pngapple-touch-startup-image-320x460.png')
+
+        meta(property='og:title' content=''+PAGE_TTILE)
+        meta(property='og:type' content='website')
+        meta(property='og:description' content=''+APP_DESCRIPTION)
+
+        meta(property='og:url' content=''+homepage)
+        meta(property='og:site_name' content=''+appName)
+        meta(property='fb:admins' content='100006609169473')
+
+        //- FIXME
+        meta(property='place:location:latitude' content='55.00000')
+        meta(property='place:location:longitude' content='82.000000')
+        meta(property='business:contact_data:street_address' content=''+STREET_ADDRESS)
+        meta(property='business:contact_data:locality' content=''+CITY)
+        meta(property='business:contact_data:postal_code' content='630000')
+        meta(property='business:contact_data:country_name' content=''+COUNTRY)
+        meta(property='business:contact_data:email' content='support@site.com')
+        meta(property='business:contact_data:phone_number' content='+ 7 383 209 09 08')
+        meta(property='business:contact_data:website' content=''+homepage)
+        meta(name='geo.position' content='55.00000;82.000000')
+        meta(name='ICBM' content='55.00000, 82.000000')
+        meta(name='geo.placename' content=''+PLACENAME)
+        meta(name='geo.region' content=''+REGION)
+    body
+        #root
+        //-include ../blocks/_oldIEnotice.pug
+        //-include ../blocks/_noJSnotice.pug
+        //-<script id="__bs_script__">//<![CDATA[document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.18.8'><\/script>".replace("HOST", location.hostname));//]]></script>

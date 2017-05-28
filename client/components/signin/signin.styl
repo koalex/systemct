@@ -1,0 +1,47 @@
+/*
+  Author: ✰ Konstantin Aleksandrov ✰ https://github.com/koalex
+
+  File Structure :
+    1.  Name
+    	1.1. Sub-name
+*/
+
+/************************
+  1. Name
+************************/
+
+
+/* 1.1  Sub-name */
+
+:local(.container)
+  overflow-x hidden
+  overflow-y scroll
+  display flex
+  flex-direction column
+  justify-content center
+  align-items center
+  height 100%
+  text-align center
+  background #eaeaea /*url('../../assets/img/leather-bg.jpg') 0 0 repeat*/
+  box-shadow inset 0 0 100px rgba(0,0,0,.5)
+  > *
+    max-width 400px
+
+:local(.inputContainer)
+  min-height 115px
+
+:local(.progress)
+  position fixed !important
+  top 0
+  left 0
+  max-width 100%
+
+:local(.logo)
+  max-width 400px
+  max-height 135px
+
+:local(.placeholder)
+  color #fff
+
+:local(.signinForm)
+  display inline-block

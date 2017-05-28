@@ -1,0 +1,51 @@
+@charset "UTF-8";
+/*
+  Author: ✰ Konstantin Aleksandrov ✰
+
+  File Structure :
+    1.  VIEWPORT MIXINS
+*/
+
+/************************
+  1. VIEWPORT MIXINS
+************************/
+
+.vw-font-size(@num) { font-size: (@num / 3.2vw); }
+
+.vw-line-height(@font-size, @num) { line-height: (@font-size / 3.2vw) * @num; }
+
+.vw-background-size(@num, @num2) { background-size: (@num / 3.2vw) (@num2 / 3.2vw); }
+
+.vw-width(@num)     { width: (@num / 3.2vw); }
+.vw-min-width(@num) { min-width: (@num / 3.2vw); }
+.vw-max-width(@num) { max-width: (@num / 3.2vw); }
+
+.vw-height(@num)     { height: (@num / 3.2vw); }
+.vw-min-height(@num) { min-height: (@num / 3.2vw); }
+.vw-max-height(@num) { max-height: (@num / 3.2vw); }
+
+/* MARGIN */
+.vw-margin(@num, @num2, @num3, @num4) { margin: (@num / 3.2vw) (@num2 / 3.2vw) (@num3 / 3.2vw) (@num4 / 3.2vw); }
+.vw-margin(@num, @num2, @num3)        { margin: (@num / 3.2vw) (@num2 / 3.2vw) (@num3 / 3.2vw); }
+.vw-margin(@num, @num2)               { margin: (@num / 3.2vw) (@num2 / 3.2vw); }
+.vw-margin(@num)                      { margin: (@num / 3.2vw); }
+.vw-margin-top(@num)     { margin-top:    (@num / 3.2vw); }
+.vw-margin-right(@num)   { margin-right:  (@num / 3.2vw); }
+.vw-margin-bottom(@num)  { margin-bottom: (@num / 3.2vw); }
+.vw-margin-left(@num)    { margin-left:   (@num / 3.2vw); }
+/* /MARGIN */
+
+/* PADDING */
+.vw-padding(@num, @num2, @num3, @num4) { padding: (@num / 3.2vw) (@num2 / 3.2vw) (@num3 / 3.2vw) (@num4 / 3.2vw); }
+.vw-padding(@num, @num2, @num3)        { padding: (@num / 3.2vw) (@num2 / 3.2vw) (@num3 / 3.2vw); }
+.vw-padding(@num, @num2)               { padding: (@num / 3.2vw) (@num2 / 3.2vw); }
+.vw-padding(@num)                      { padding: (@num / 3.2vw); }
+.vw-padding-top(@num)     { padding-top:    (@num / 3.2vw); }
+.vw-padding-right(@num)   { padding-right:  (@num / 3.2vw); }
+.vw-padding-bottom(@num)  { padding-bottom: (@num / 3.2vw); }
+.vw-padding-left(@num)    { padding-left:   (@num / 3.2vw); }
+/* /PADDING */
+
+/************************
+  end of VIEWPORT MIXINS
+************************/
