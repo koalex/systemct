@@ -33,7 +33,6 @@
           "port": "22"
         }
       ],
-      "key": "/root/.ssh/id_rsa.pub",
       "ref"  : "origin/master",
       "repo" : "git@github.com:koalex/systemct.git",
       "path" : "/root/systemct",
