@@ -10,7 +10,7 @@
 const join  = require('path').join;
 
 module.exports =  {
-             port: process.env.NODE_PORT ? process.env.NODE_PORT : 3000,
+             port: process.env.PORT ? process.env.PORT : 3000,
          siteName: 'SYSTEMCT',
          siteDesc: 'SYSTEMCT – electrical equipment monitoring system',
        siteAuthor: 'Konstantin Aleksandrov',

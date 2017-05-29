@@ -32,6 +32,7 @@
     "restart": "pm2 restart ecosystem.json --env production",
     "build": "webpack",
     "deploy": "pm2 deploy ecosystem.json production",
+    "deploy:setup": "pm2 deploy ecosystem.json production setup",
     "test": "NODE_PORT=2999 mocha ./handlers --recursive",
     "cover": "NODE_PORT=2999 nyc --reporter=html --reporter=lcov --reporter=text --reporter=text-summary --require babel-register --require babel-polyfill --report-dir coverage mocha ./handlers --recursive",
     "db:start": "sudo mongod --config ./config/mongod.conf",

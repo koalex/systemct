@@ -12,21 +12,21 @@
       "max_memory_restart": "1G",
       "autorestart": true,
       "node_args": ["--harmony-async-await"],
-      "watch": true,
-      "ignore_watch" : ["node_modules", "files", "uploads", "coverage"],
+      "watch": false,
       "env": {
         "COMMON_VARIABLE": "true"
       },
       "env_production" : {
         "NODE_ENV": "production",
-        "NODE_PORT": 3000
+        "NODE_CONFIG_STRICT_MODE": false,
+        "PORT": 3000
       }
     }
   ],
 
   "deploy" : {
     "production" : {
-      "user" : "root",
+      "user" : "systemct",
       "host" : [
         {
           "host": "188.225.32.111",
@@ -35,7 +35,7 @@
       ],
       "ref"  : "origin/master",
       "repo" : "git@github.com:koalex/systemct.git",
-      "path" : "/root/systemct",
+      "path" : "/home/systemct/systemct",
       "post-deploy" : ". ~/.nvm/nvm.sh && . ~/.profile && . ~/.bashrc && nvm use 7* && yarn install --ignore-engines && webpack --json --profile >stats.json && pm2 startOrReload ecosystem.json --env production && pm2 save"
     }
   }
