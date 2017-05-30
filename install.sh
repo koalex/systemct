@@ -43,5 +43,5 @@ sudo apt-get update && sudo apt-get install yarn
 
 npm install pm2@latest -g
 
-yarn global add webpack@2.5.0 webpack-dev-server@2.4.5
+yarn global add webpack@2.6.1 webpack-dev-server@2.4.5
 
