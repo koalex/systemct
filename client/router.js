@@ -88,7 +88,7 @@ export default class Routes extends Component {
                     </Route>
                     <Route path='/signin'
                            render={ props => this.props.common.isAuthenticated ? <Redirect to={{
-                               pathname: '/users',
+                               pathname: '/',
                                state: { from: props.location }
                            }}/> : <Signin {...props} socket={ socketPublic }></Signin> }>
                     </Route>
