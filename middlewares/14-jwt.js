@@ -14,7 +14,7 @@ const normalize   = require('path').normalize;
 const jwt         = require('jsonwebtoken');
 const BlackList   = require('../handlers/auth/models/blacklist');
 const Socket      = require('../libs/socket');
-const { USERS, _CREATE, _READ, _UPDATE, _DELETE, _SUCCESS, _ERROR } = require(config.actionsRoot);
+const { USERS, ACTIVITY, _CREATE, _READ, _UPDATE, _DELETE, _SUCCESS, _ERROR } = require(config.actionsRoot);
 
 passport.use('jwt', require('../handlers/auth/strategies/jwt'));
 
@@ -44,10 +44,11 @@ module.exports = async (ctx, next) => {
             await user.save();
 
             config.roles.filter(role => role !== 'manager').forEach(role => {
-                Socket.emitter.of('/api').to(role).emit(USERS + _UPDATE + _SUCCESS, user.toJSON());
+                Socket.emitter.of('/api').to(role).emit(USERS + ACTIVITY + _UPDATE + _SUCCESS, user.toJSON());
             });
 
-            ctx.state.user = user;
+            ctx.state.user  = user;
+            ctx.state.token = token;
 
             await next();
 

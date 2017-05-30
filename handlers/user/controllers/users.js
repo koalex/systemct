@@ -6,7 +6,7 @@ const AccessControl = require('accesscontrol');
 const abac          = new AccessControl(/*grants*/);
 const Socket        = require('../../../libs/socket');
 
-const { USERS, _CREATE, _READ, _UPDATE, _DELETE, _SUCCESS, _ERROR } = require(config.actionsRoot);
+const { USERS, MODAL, _HIDE, _CREATE, _READ, _UPDATE, _DELETE, _SUCCESS, _ERROR } = require(config.actionsRoot);
 
 /*const grants = {
     superuser: {
@@ -80,7 +80,9 @@ exports.create = async ctx => {
     let userCandidate           = ctx.request.body.user;
         userCandidate.password  = userCandidate.password;
 
-    const permission = abac.can(ctx.state.user.role).createAny(userCandidate.role || 'forbidden');
+    if (!userCandidate.role) ctx.throw(400);
+
+    const permission = abac.can(ctx.state.user.role).createAny(userCandidate.role);
 
     if (permission.granted) {
         if (!userCandidate) ctx.throw(400);
@@ -102,6 +104,12 @@ exports.create = async ctx => {
             Socket.emitter.of('/api').to(role).emit(USERS + _CREATE + _SUCCESS, newUser);
         });
 
+        let userSocketSessionIds = await Socket.session_ids(ctx.state.token);
+            userSocketSessionIds.forEach(s_id => {
+                Socket.emitter.of('/api').to(s_id).emit(USERS + MODAL + _HIDE);
+            });
+        // Socket.emitter.of('/api').to(String(ctx.state.user._id)).emit(USERS + MODAL + _HIDE);
+
         ctx.status = 201;
         ctx.body   = { _id: newUser._id };
     } else {
@@ -112,7 +120,9 @@ exports.create = async ctx => {
 exports.update = async ctx => {
     let userCandidate = ctx.request.body.user;
 
-    const permission = abac.can(ctx.state.user.role).updateAny(userCandidate.role || 'forbidden');
+    if (!userCandidate.role) ctx.throw(400);
+
+    const permission = abac.can(ctx.state.user.role).updateAny(userCandidate.role);
 
     if (permission.granted) {
         if (!userCandidate) ctx.throw(400);
@@ -127,12 +137,12 @@ exports.update = async ctx => {
 
         let user = await User.findOne({ _id: ctx.params.id });
 
+        if (!user) ctx.throw(400);
+
         if (userCandidate.locked_until == null) {
             await user.incSigninAttempts(true);
             delete user.locked_until;
         }
-
-        if (!user) ctx.throw(400);
 
         for (let k in userCandidate) {
             user[k] = userCandidate[k];
@@ -145,6 +155,10 @@ exports.update = async ctx => {
         config.roles.filter(role => role !== 'manager').forEach(role => {
             Socket.emitter.of('/api').to(role).emit(USERS + _UPDATE + _SUCCESS, user.toJSON());
         });
+        let userSocketSessionIds = await Socket.session_ids(ctx.state.token);
+            userSocketSessionIds.forEach(s_id => {
+                Socket.emitter.of('/api').to(s_id).emit(USERS + MODAL + _HIDE);
+            });
 
         ctx.type = 'json';
 
@@ -159,12 +173,14 @@ exports.delete = async ctx => {
 
     let user = await User.findOne({ _id: ctx.params.id });
 
+    if (!user || !user.role) ctx.throw(400);
+
     if (user.immortal === true) {
         ctx.throw(403);
         return;
     }
 
-    const permission = abac.can(ctx.state.user.role).deleteAny(user.role || 'forbidden');
+    const permission = abac.can(ctx.state.user.role).deleteAny(user.role);
 
     if (permission.granted) {
         await User.remove({ _id: ctx.params.id });
@@ -178,124 +194,6 @@ exports.delete = async ctx => {
         ctx.throw(403);
     }
 };
-
-exports.socketCreate = Socket => {
-    Socket.io
-        .of('/api')
-        .on('connection', socket => {
-            socket.on(USERS + _CREATE, data => {
-                if (!data || !data.user || !data.user.role || config.roles.every(role => role !== data.user.role)) {
-                    socket.emit(USERS + _CREATE + _ERROR, { status: 400, message: socket.i18n.__('BAD_REQUEST') });
-                    return;
-                }
-
-                const permission = abac.can(socket.user.role).createAny(data.user.role || ' ');
-
-                if (permission.granted) {
-
-                    data.user.immortal         = false;
-                    data.user.created_by       = socket.user._id;
-                    data.user.created_at       = Date.now();
-                    data.user.last_updated_by  = socket.user._id;
-                    data.user.last_updated_at  = Date.now();
-
-                    let newUser = new User(data.user);
-
-                    newUser.save().then(() => {
-                        // Socket.emitter.to('superuser').emit('USER_SUBMIT_SUCCESS', newUser);
-                        // Socket.emitter.to('admin').emit('USER_SUBMIT_SUCCESS', newUser);
-                        socket.emit(USERS + _CREATE + _SUCCESS, newUser);
-                    }).catch(err => {
-                        if (err.errors) {
-                            for (let errKey in err.errors) {
-                                let message = err.errors[errKey].message;
-                                if (message) message = message.split(',')[0];
-                                let field = err.errors[errKey].path;
-
-                                socket.emit(USERS + _CREATE + _ERROR, { status: err.status || err.statusCode, field: field ? field : null, message: socket.i18n.__(message || err.message) });
-                            }
-                        } else {
-                            socket.emit(USERS + _CREATE + _ERROR, { status: err.status || err.statusCode, message: socket.i18n.__('BAD_REQUEST' /*err.message*/) });
-                        }
-                    });
-                } else {
-                    socket.emit(USERS + _CREATE + _ERROR, { status: 403, message: socket.i18n.__('FORBIDDEN') });
-                }
-            });
-        });
-};
-
-
-
-exports.socketUpdate = Socket => {
-    Socket.io
-        .of('/api')
-        .on('connection', socket => {
-            socket.on(USERS + _UPDATE, data => {
-
-                if (!data || !data.user || !data.user.role || config.roles.every(role => role !== data.user.role)) {
-                    socket.emit(USERS + _UPDATE + _ERROR, { status: 400, message: socket.i18n.__('BAD_REQUEST') });
-                    return;
-                }
-
-                const permission = abac.can(socket.user.role).createAny(data.user.role || ' ');
-
-
-                if (permission.granted) {
-                    data.user.created_by       = socket.user._id;
-                    data.user.created_at       = Date.now();
-                    data.user.last_updated_by  = socket.user._id;
-                    data.user.last_updated_at  = Date.now();
-
-
-                    void async function () {
-                        let userUpdated = data.user;
-
-                        let user = await User.findOne({ _id: userUpdated._id });
-
-                        if (user.immortal) {
-                            socket.emit(USERS + _UPDATE + _ERROR, { status: 403, message: socket.i18n.__('FORBIDDEN') });
-                            return;
-                        }
-
-                            try {
-                            delete userUpdated._id;
-                            // delete userUpdated.password;
-                            // delete userUpdated.passwordConfirmation;
-                            for (let k in userUpdated) {
-                                if (k !== 'immortal') {
-                                    user[k] = userUpdated[k];
-                                }
-                            }
-
-                            await user.save();
-                            socket.emit(USERS + _UPDATE + _SUCCESS, user);
-
-                        } catch(err) {
-                            if (err.errors) {
-                                for (let errKey in err.errors) {
-                                    let message = err.errors[errKey].message;
-                                    if (message) message = message.split(',')[0];
-                                    let field = err.errors[errKey].path;
-
-                                    socket.emit(USERS + _UPDATE + _ERROR, { status: err.status || err.statusCode, field: field ? field : null, message: socket.i18n.__(message || err.message) });
-                                }
-                            } else {
-                                socket.emit(USERS + _UPDATE + _ERROR, { status: err.status || err.statusCode, message: socket.i18n.__('BAD_REQUEST' /*err.message*/) });
-                            }
-                        }
-                    }();
-
-
-
-                } else {
-                    socket.emit(USERS + _UPDATE + _ERROR, { status: 403, message: socket.i18n.__('FORBIDDEN') });
-                }
-            });
-        });
-};
-
-
 
 exports.getMe = async ctx => { ctx.body = ctx.state.user; };
 

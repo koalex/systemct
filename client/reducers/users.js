@@ -1,6 +1,6 @@
 'use strict';
 
-import { USERS, _READ, _CREATE, _UPDATE, _DELETE, MODAL, _SHOW, _HIDE, _SUCCESS, _ERROR, _CLEAR, INPUT_CHANGE } from '../actions/constants';
+import { USERS, ACTIVITY, _READ, _CREATE, _UPDATE, _DELETE, MODAL, _SHOW, _HIDE, _SUCCESS, _ERROR, _CLEAR, INPUT_CHANGE } from '../actions/constants';
 
 const defaultState = {
     isLoading: false,
@@ -12,7 +12,7 @@ const defaultState = {
 export default function (state = defaultState, action) {
     const { data, payload, type, ...rest } = action;
 
-    let nextState;
+    let nextState, users, tmp;
 
     switch(type) {
         default: return state;
@@ -51,11 +51,13 @@ export default function (state = defaultState, action) {
             break;
 
         case  USERS + _CREATE + _SUCCESS:
+                users = state.users.map(user => Object.assign({}, user));
+                users.push(payload);
             return Object.assign({}, state, {
                 isLoading: false,
-                users: state.users.map(user => Object.assign({}, user)).push(payload),
-                error: false
-            });
+                users: users,
+                        error: false
+                    });
 
             break;
 
@@ -89,7 +91,18 @@ export default function (state = defaultState, action) {
             break;
 
         case  USERS + _UPDATE + _SUCCESS:
-            let users = state.users.map(user => {
+            users = state.users.map(user => {
+                let newUser = Object.assign(user);
+                if (newUser._id === payload._id) newUser = payload;
+                return newUser;
+            });
+
+            return Object.assign({}, state, { users });
+
+            break;
+
+        case  USERS + ACTIVITY + _UPDATE + _SUCCESS:
+            users = state.users.map(user => {
                 let newUser = Object.assign(user);
                 if (newUser._id === payload._id) newUser = payload;
                 return newUser;
@@ -136,8 +149,10 @@ export default function (state = defaultState, action) {
             break;
 
         case  USERS + _DELETE + _SUCCESS:
+            tmp = Object.assign({}, payload);
+
             return Object.assign({}, state, {
-                users: state.users.filter(user => user._id !== payload._id),
+                users: state.users.map(user => Object.assign({}, user)).filter(user => user._id !== tmp._id),
                 isLoading: false,
                 errors: {},
                 error: false
@@ -169,7 +184,7 @@ export default function (state = defaultState, action) {
             break;
 
         case MODAL + _HIDE:
-            if ('ADD_EDIT_USER' === data.modalType) return Object.assign({}, state, { user: null });
+            if ('ADD_EDIT_USER' === data.modalType) return Object.assign({}, state, { user: {} });
 
             break;
 

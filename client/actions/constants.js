@@ -14,10 +14,11 @@ const _CLEAR          = '_CLEAR';
 const AUTH            = 'AUTH:';
 const USERS           = 'USERS:';
 const MODAL           = 'MODAL:';
+const ACTIVITY        = 'ACTIVITY:';
 
-const  INPUT_CHANGE   = 'INPUT_CHANGE';
-const  SIGNIN         = 'SIGNIN';
-const  SIGNOUT        = 'SIGNOUT';
+const INPUT_CHANGE   = 'INPUT_CHANGE';
+const SIGNIN         = 'SIGNIN';
+const SIGNOUT        = 'SIGNOUT';
 
 module.exports = {
     _CREATE,
@@ -33,6 +34,7 @@ module.exports = {
 
     AUTH,
     USERS,
+    ACTIVITY,
     MODAL,
 
     INPUT_CHANGE,

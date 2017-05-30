@@ -4,7 +4,7 @@ const config        = require('config');
 const LocalStrategy = require('passport-local').Strategy;
 const User          = require('../../user/models/user');
 const Socket        = require('../../../libs/socket');
-const { USERS, _CREATE, _READ, _UPDATE, _DELETE, _SUCCESS, _ERROR } = require(config.actionsRoot);
+const { USERS, ACTIVITY, _CREATE, _READ, _UPDATE, _DELETE, _SUCCESS, _ERROR } = require(config.actionsRoot);
 
 module.exports = new LocalStrategy({
     usernameField: 'email',
@@ -25,7 +25,7 @@ function (email, password, done) {
                 user = user.toJSON();
 
                 config.roles.filter(role => role !== 'manager').forEach(role => {
-                    Socket.emitter.of('/api').to(role).emit(USERS + _UPDATE + _SUCCESS, user);
+                    Socket.emitter.of('/api').to(role).emit(USERS + ACTIVITY + _UPDATE + _SUCCESS, user);
                 });
             });
 

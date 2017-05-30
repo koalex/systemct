@@ -16,9 +16,6 @@ export default function (state = {}, action) {
             break;
 
         case MODAL + _HIDE:
-            /*return Object.assign({}, state, {
-                isOpen: false
-            });*/
             return { isOpen: false };
             break;
     }

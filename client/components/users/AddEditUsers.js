@@ -10,7 +10,7 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import FlatButton from 'material-ui/FlatButton';
 import Snackbar                 from 'material-ui/Snackbar';
-import { USERS, _CREATE, _UPDATE, _CLEAR, _SUCCESS, _ERROR } from '../../actions/constants'
+import { USERS, MODAL, _HIDE, _CREATE, _UPDATE, _CLEAR, _SUCCESS, _ERROR } from '../../actions/constants'
 
 export default class AddEditUsers extends Component {
     constructor(...props) {
@@ -34,10 +34,7 @@ export default class AddEditUsers extends Component {
     };
 
     socketListensers = {
-        [USERS + _CREATE + _SUCCESS]: () => {
-            this.props.modalHide({ modalType: this.props.modalType })
-        },
-        [USERS + _UPDATE + _SUCCESS]: () => {
+        [USERS + MODAL + _HIDE]: () => {
             this.props.modalHide({ modalType: this.props.modalType })
         }
     };
@@ -73,7 +70,7 @@ export default class AddEditUsers extends Component {
             role: this.refs.roleSelect.props.value
         };
 
-         if ('edit' === mode) user.active = currentUser.active;
+        if ('edit' === mode) user.active = currentUser.active;
 
         if (__USER__._id !== currentUser._id && currentUser.immortal != true) {
             user.password                = this.refs.passwordInput.input.value;

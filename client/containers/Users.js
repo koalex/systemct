@@ -12,7 +12,7 @@ import UserHistory from '../components/users/UserHistory';
 
 import { connect }              from 'react-redux';
 import { usersRead, usersUpdate, usersDelete, modalShow, modalHide, usersCreate, inputChange, dispatch } from '../actions';
-import { USERS, _CREATE, _UPDATE, _DELETE, _SUCCESS, _ERROR } from '../actions/constants';
+import { USERS, ACTIVITY, _CREATE, _UPDATE, _DELETE, _SUCCESS, _ERROR } from '../actions/constants';
 
 const MODAL_COMPONENTS = {
     'ADD_EDIT_USER': AddEditUser,
@@ -69,6 +69,12 @@ export default class Users extends Component {
         [USERS + _UPDATE + _SUCCESS]: user => {
             this.props.dispatch({
                 type: USERS + _UPDATE + _SUCCESS,
+                payload: user
+            });
+        },
+        [USERS + ACTIVITY + _UPDATE + _SUCCESS]: user => {
+            this.props.dispatch({
+                type: USERS + ACTIVITY + _UPDATE + _SUCCESS,
                 payload: user
             });
         },
