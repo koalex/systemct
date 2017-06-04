@@ -49,6 +49,13 @@
 	"ROLE_REQUIRED": "укажите роль",
 	"WRONG_ROLE": "неверно указана роль",
 	"VAL_NOT_UNIQUE": "уже занято",
+	"SENSOR_TITLE_REQUIRED": "название датчика не заполнено",
+	"UGO_TITLE_REQUIRED": "название УГО не запонено",
+	"DEVICE_TITLE_REQUIRED": "название устройства не заполнено",
+	"REGISTER_PARAM_REQUIRED": "параметр регистра не заполнен",
+
+
+
 	"Unexpected token )": "Unexpected token )",
 	"Socket.of is not a function": "Socket.of is not a function",
 	"userUpdated is not defined": "userUpdated is not defined",
