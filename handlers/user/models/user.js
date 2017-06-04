@@ -114,37 +114,37 @@ userSchema.methods.checkPassword = function (password) {
     return String(crypto.pbkdf2Sync(password, this.salt, config.crypto.hash.iterations, config.crypto.hash.length, 'sha512')) === this.password_hash;
 };
 
-const MAX_ATTEMPTS = 3;
-const BLOCK_TIME   = 2 * 60 * 60 * 1000; // 2 hour
+const MAX_ATTEMPTS          = 3;
+const BLOCK_TIME            = 2 * 60 * 60 * 1000; // 2 hour
 const IMMORATL_BLOCK_TIME   = 86400000 * 365 * 100; // 100 years
 
 userSchema.methods.incSigninAttempts = function (clear, cb) {
     if (!cb) cb = err => { if (err) console.log(err) };
 
     if (clear) {
-        return this.update({
+        return this.model('User').findOneAndUpdate({ _id: this._id }, {
             $set: { signin_attempts: 0 },
-            $unset: { locked_until: new Date(100) }
+            $unset: { locked_until: new Date(1) }
         }, cb);
     } else if (this.locked) {
-        return this.update({
+        return this.model('User').findOneAndUpdate({ _id: this._id }, {
             $inc: { signin_attempts: 1 },
             $set: { locked_until: new Date(Date.now() + (this.immortal ? IMMORATL_BLOCK_TIME : BLOCK_TIME)) }
         }, cb);
     } else if (!this.locked && this.signin_attempts == MAX_ATTEMPTS - 1) {
-        return this.update({
+        return this.model('User').findOneAndUpdate({ _id: this._id }, {
             $inc: { signin_attempts: 1 },
             $set: { locked_until: new Date(Date.now() + (this.immortal ? IMMORATL_BLOCK_TIME : BLOCK_TIME)) }
         }, cb);
-
+                                // 2    +2
     } else if (!this.locked && this.signin_attempts < MAX_ATTEMPTS) {
-        return this.update({
+        return this.model('User').findOneAndUpdate({ _id: this._id }, {
             $inc: { signin_attempts: 1 },
             $unset: { locked_until: new Date(1) }
         }, cb);
 
     } else if (!this.locked && this.signin_attempts > (MAX_ATTEMPTS - 1)) {
-        return this.update({
+        return this.model('User').findOneAndUpdate({ _id: this._id }, {
             $set: { signin_attempts: 0 },
             $unset: { locked_until: new Date(1) }
         }, cb);
