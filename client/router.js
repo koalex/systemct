@@ -75,9 +75,11 @@ export default class Routes extends Component {
                                     transitionEnterTimeout={ 300 }
                                     transitionLeaveTimeout={ 250 }
                                 >
-                                    <Route key={ props.location.key + 1 } path="/dictionaries"  render={ props => <Dictionaries {...props} socket={ connectToSocketAPI() }></Dictionaries> }/>
-                                    <Route key={ props.location.key + 2 } path="/users"  render={ props => <Users {...props} socket={ connectToSocketAPI() }></Users> }/>
-                                    <Route key={ props.location.key + 3 } path="/charts"  render={ props => <img src="http://st.depositphotos.com/1010338/2980/v/950/depositphotos_29806589-stock-illustration-infographics-vector-flat-design-financial.jpg"
+                                    <Route key={ props.location.key + 1 } path="/dictionaries/ugo"  render={ props => <h1>УГО</h1> }/>
+                                    <Route key={ props.location.key + 2 } path="/dictionaries/sensors"  render={ props => <h1>Датчики</h1> }/>
+                                    <Route key={ props.location.key + 3 } path="/dictionaries/devices"  render={ props => <h1>Устройства</h1> }/>
+                                    <Route key={ props.location.key + 4 } path="/users"  render={ props => <Users {...props} socket={ connectToSocketAPI() }></Users> }/>
+                                    <Route key={ props.location.key + 5 } path="/charts"  render={ props => <img src="http://st.depositphotos.com/1010338/2980/v/950/depositphotos_29806589-stock-illustration-infographics-vector-flat-design-financial.jpg"
                                                                                                                  alt=""/> }/>
                                 </CSSTransitionGroup>
 
