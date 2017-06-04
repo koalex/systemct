@@ -1,4 +1,4 @@
-/*** ✰✰✰ Konstantin Alexandrov ✰✰✰ https://github.com/koalex ✰✰✰ ***/
+/*** ✰✰✰ Konstantin Aleksandrov ✰✰✰ https://github.com/koalex ✰✰✰ ***/
  /* 
    ================================
    ===       MODULE NAME       ====
