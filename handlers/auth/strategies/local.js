@@ -19,7 +19,7 @@ function (email, password, done) {
         if (!user) return done(null, false, { field: 'email', message: 'USER_NOT_FOUND' });
 
         if (user.locked) {
-            user.incSigninAttempts(false, err => {
+            user.incSigninAttempts(false, (err, user) => {
                 if (err) console.log(err);
 
                 user = user.toJSON();
@@ -27,18 +27,40 @@ function (email, password, done) {
                 config.roles.filter(role => role !== 'manager').forEach(role => {
                     Socket.emitter.of('/api').to(role).emit(USERS + ACTIVITY + _UPDATE + _SUCCESS, user);
                 });
+
+                done(null, false, { field: 'email', message: 'USER_BLOCKED' });
             });
 
-            return done(null, false, { field: 'email', message: 'USER_BLOCKED' });
+            return;
         }
+
         if (!user.checkPassword(password)) {
 
-            user.incSigninAttempts(false, err => { if (err) console.log(err); });
-            return done(null, false, { field: 'password', message: 'WRONG_PASSWORD' });
+            user.incSigninAttempts(false, (err, user) => {
+                if (err) console.log(err);
+
+                if (user.locked) {
+                    user = user.toJSON();
+
+                    config.roles.filter(role => role !== 'manager').forEach(role => {
+                        Socket.emitter.of('/api').to(role).emit(USERS + ACTIVITY + _UPDATE + _SUCCESS, user);
+                    });
+
+                    done(null, false, { field: 'email', message: 'USER_BLOCKED' });
+                } else {
+                    done(null, false, { field: 'password', message: 'WRONG_PASSWORD' });
+                }
+
+            });
+            return;
         }
 
-        user.incSigninAttempts(true);
-        return done(null, user);
+        user.incSigninAttempts(true, (err, user) => {
+            if (err) console.log(err);
+
+            done(null, user)
+        });
+
     });
 });
 
