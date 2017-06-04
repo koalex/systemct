@@ -23,17 +23,17 @@ Api.get('/ugo/:id', ugo.read);
 Api.put('/ugo/:id', ugo.update);
 Api.del('/ugo/:id', ugo.delete);
 
-Api.post('/sensor',    sensor.create);
-Api.get('/sensor',     sensor.read);
-Api.get('/sensor/:id', sensor.read);
-Api.put('/sensor/:id', sensor.update);
-Api.del('/sensor/:id', sensor.delete);
+Api.post('/sensors',    sensor.create);
+Api.get('/sensors',     sensor.read);
+Api.get('/sensors/:id', sensor.read);
+Api.put('/sensors/:id', sensor.update);
+Api.del('/sensors/:id', sensor.delete);
 
-Api.post('/device',    device.create);
-Api.get('/device',     device.read);
-Api.get('/device/:id', device.read);
-Api.put('/device/:id', device.update);
-Api.del('/device/:id', device.delete);
+Api.post('/devices',    device.create);
+Api.get('/devices',     device.read);
+Api.get('/devices/:id', device.read);
+Api.put('/devices/:id', device.update);
+Api.del('/devices/:id', device.delete);
 
 
 router.use(Api.routes());
