@@ -10,9 +10,14 @@ const _CHECK          = '_CHECK';
 const _SHOW           = '_SHOW';
 const _HIDE           = '_HIDE';
 const _CLEAR          = '_CLEAR';
+const _DROP           = '_DROP';
+const _IMPORT         = '_IMPORT';
+const _EXPORT         = '_EXPORT';
 
 const AUTH            = 'AUTH:';
 const USERS           = 'USERS:';
+const DICTIONARY      = 'DICTIONARY:';
+const UGO             = 'UGO:';
 const MODAL           = 'MODAL:';
 const ACTIVITY        = 'ACTIVITY:';
 
@@ -31,9 +36,14 @@ module.exports = {
     _SHOW,
     _HIDE,
     _CLEAR,
+    _DROP,
+    _IMPORT,
+    _EXPORT,
 
     AUTH,
     USERS,
+    DICTIONARY,
+    UGO,
     ACTIVITY,
     MODAL,
 

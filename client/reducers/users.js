@@ -180,11 +180,14 @@ export default function (state = defaultState, action) {
                     user: data.user ? Object.assign({}, data.user) : {}
                 });
             }
+            return state;
 
             break;
 
         case MODAL + _HIDE:
             if ('ADD_EDIT_USER' === data.modalType) return Object.assign({}, state, { user: {} });
+
+            return state;
 
             break;
 
@@ -196,6 +199,7 @@ export default function (state = defaultState, action) {
 
                 return nextState;
             }
+            return state;
 
             break;
     }

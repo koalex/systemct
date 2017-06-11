@@ -5,6 +5,7 @@
 	"NOT_FOUND": "страница не найдена",
 	"FORBIDDEN": "доступ запрещён",
 	"AUTH_ERR": "ошибка авторизации",
+	"DICTIONARY_EMPTY": "справочник пуст",
 	"GO_2_HOME_PAGE": "на главную страницу",
 	"frontpage": {
 		"PAGE_TITLE": "PAGE_TITLE",
@@ -66,5 +67,21 @@
 	"Cast to Date failed for value \"{ buffer: { type: 'Buffer', data: [ 0, 0, 1, 92, 79, 111, 183, 14 ] },\n  type: 0 }\" at path \"last_activity\"": "Cast to Date failed for value \"{ buffer: { type: 'Buffer', data: [ 0, 0, 1, 92, 79, 111, 183, 14 ] },\n  type: 0 }\" at path \"last_activity\"",
 	"Cast to ObjectID failed for value \"{ _bsontype: 'ObjectID',\n  id: \n   { type: 'Buffer',\n     data: [ 89, 29, 1, 163, 86, 229, 229, 26, 8, 76, 56, 47 ] } }\" at path \"created_by\"": "Cast to ObjectID failed for value \"{ _bsontype: 'ObjectID',\n  id: \n   { type: 'Buffer',\n     data: [ 89, 29, 1, 163, 86, 229, 229, 26, 8, 76, 56, 47 ] } }\" at path \"created_by\"",
 	"Cast to Date failed for value \"{ buffer: { type: 'Buffer', data: [ 0, 0, 1, 92, 80, 10, 193, 136 ] },\n  type: 0 }\" at path \"locked_until\"": "Cast to Date failed for value \"{ buffer: { type: 'Buffer', data: [ 0, 0, 1, 92, 80, 10, 193, 136 ] },\n  type: 0 }\" at path \"locked_until\"",
-	"Delete of an unqualified identifier in strict mode.": "Delete of an unqualified identifier in strict mode."
+	"Delete of an unqualified identifier in strict mode.": "Delete of an unqualified identifier in strict mode.",
+	"Cannot read property 'push' of undefined": "Cannot read property 'push' of undefined",
+	"ctx.multipartParser.show is not a function": "ctx.multipartParser.show is not a function",
+	"Multipart: Boundary not found": "Multipart: Boundary not found",
+	"Cannot read property '0' of undefined": "Cannot read property '0' of undefined",
+	"Identifier 'UGO' has already been declared": "Identifier 'UGO' has already been declared",
+	"MODAL is not defined": "MODAL is not defined",
+	"create(gz): format not registered": "create(gz): format not registered",
+	"Cannot read property 'on' of undefined": "Cannot read property 'on' of undefined",
+	"output is not defined": "output is not defined",
+	"СПРАВОЧНИК ПУСТ": "СПРАВОЧНИК ПУСТ",
+	"Unexpected token const": "Unexpected token const",
+	"Unexpected strict mode reserved word": "Unexpected strict mode reserved word",
+	"Unexpected token }": "Unexpected token }",
+	"Cannot read property 'filename' of undefined": "Cannot read property 'filename' of undefined",
+	"callback is not a function": "callback is not a function",
+	"Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }": "Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }"
 }

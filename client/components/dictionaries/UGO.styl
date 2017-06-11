@@ -1,0 +1,85 @@
+/*
+  Author: ✰ Konstantin Aleksandrov ✰ https://github.com/koalex
+
+  File Structure :
+    1.  Name
+    	1.1. Sub-name
+*/
+
+/************************
+  1. Name
+************************/
+
+
+/* 1.1  Sub-name */
+
+:local(.ugo-paper)
+  display inline-block
+  margin 20px
+  padding-bottom 1em
+  width 200px
+  //height 200px
+  text-align center
+  box-sizing border-box
+  @media screen and (max-width: 480px)
+    width 180px
+  @media screen and (max-width: 440px)
+    width 170px
+  @media screen and (max-width: 420px)
+    width 160px
+
+:local(.ugo-paper-title)
+  white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
+
+:local(.ugo-add-btn)
+  position fixed
+  bottom 20px
+  right 20px
+  z-index 999
+
+:local(.ugo-upload-btn)
+  position fixed
+  bottom 20px
+  right 100px
+  z-index 999
+
+:local(.ugo-download-btn)
+  position fixed
+  bottom 20px
+  right 180px
+  z-index 999
+
+:local(.ugo-add-content)
+  display flex
+  @media screen and (max-width: 700px)
+    flex-direction column
+    align-items center
+:local(.ugo-img-container)
+  display flex
+  align-items center
+  justify-content center
+  max-width 100%
+  height 150px
+
+:local(.ugo-img)
+  max-width 100%
+  max-height 100%
+
+:local(.ugo-dropzone-cover)
+  width 200px !important
+  height 200px !important
+  > path
+    fill #ccc
+
+:local(.ugo-dropzone-preview)
+  max-width 200px
+  max-height 200px
+
+:local(.ugo-dropzone)
+  display flex
+  justify-content center
+  align-items center
+  width 200px
+  height 200px

@@ -7,16 +7,16 @@ import PropTypes                from 'prop-types';
 
 
 import { connect }              from 'react-redux';
-import { usersRead, usersUpdate, usersDelete, modalShow, modalHide, usersCreate, inputChange, dispatch } from '../actions';
-import { USERS, _CREATE, _UPDATE, _DELETE, _SUCCESS, _ERROR } from '../actions/constants';
+import { dictionaryCreate, dictionaryRead, modalShow, modalHide, inputChange, dispatch } from '../actions';
+import { DICTIONARY, _CREATE, _UPDATE, _DELETE, _SUCCESS, _ERROR } from '../actions/constants';
 
 
-/*@connect(
+@connect(
     state => {
-        const { users, modal, common } = state;
-        return { users, modal, common };
-    }, { usersRead, modalShow, modalHide, usersCreate, usersUpdate, usersDelete, inputChange, dispatch }
-)*/
+        // const { users, modal, common } = state;
+        return state/*{ users, modal, common }*/;
+    }, { dictionaryCreate, dictionaryRead, modalShow, modalHide, inputChange, dispatch }
+)
 export default class Dictionaries extends Component {
     constructor (...props) {
         super(...props);
@@ -32,7 +32,9 @@ export default class Dictionaries extends Component {
 
 
     render () {
-        return (<h1>СПРАВОЧНИКИ</h1>)
+        const { dictionaryCreate } = this.props;
+
+        return (<div>{ this.props.children }</div>)
     }
 }
 

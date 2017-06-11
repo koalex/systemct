@@ -19,7 +19,7 @@ module.exports =  {
        publicRoot: join(process.cwd(), './public'),
       actionsRoot: join(process.cwd(), './client/actions/constants'),
     templatesRoot: join(process.cwd(), './client'),
-        filesRoot: join(process.cwd(), '../files'),
+        filesRoot: join(process.cwd(), './uploads'),
            secret: 'eclipse',
 
     roles: ['superuser', 'admin', 'manager' ],

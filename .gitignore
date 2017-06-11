@@ -5,6 +5,7 @@ yarn-error.log
 coverage
 tmp
 public/
+uploads/
 logs/
 node_modules/
 bower_components/

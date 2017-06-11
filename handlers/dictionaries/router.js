@@ -17,11 +17,13 @@ const sensor        = require('./controllers/sensor');
 const device        = require('./controllers/device');
 
 
-Api.post('/ugo',    ugo.create);
-Api.get('/ugo',     ugo.read);
-Api.get('/ugo/:id', ugo.read);
-Api.put('/ugo/:id', ugo.update);
-Api.del('/ugo/:id', ugo.delete);
+Api.post('/ugo',        ugo.create);
+Api.get('/ugo',         ugo.read);
+Api.get('/ugo/export',  ugo.export);
+Api.post('/ugo/import',  ugo.imports);
+Api.get('/ugo/:id',     ugo.read);
+Api.put('/ugo/:id',     ugo.update);
+Api.del('/ugo/:id',     ugo.delete);
 
 Api.post('/sensors',    sensor.create);
 Api.get('/sensors',     sensor.read);

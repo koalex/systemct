@@ -3,6 +3,7 @@
 	"BAD_REQUEST": "bad request",
 	"NOT_FOUND": "OOPS! - Could not Find it",
 	"AUTH_ERR": "authentication error",
+	"DICTIONARY_EMPTY": "dictionary is empty",
 	"GO_2_HOME_PAGE": "Go home",
 	"frontpage": {
 		"PAGE_TITLE": "PAGE_TITLE",

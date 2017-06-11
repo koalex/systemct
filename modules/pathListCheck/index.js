@@ -9,17 +9,38 @@
 'use strict';
 
 const pathToRegexp = require('path-to-regexp');
+const paths     = [];
+const ignores   = [];
 
 module.exports = class PathListCheck {
     constructor () {
-        this.paths = [];
+        this.ignore = {
+            add: function (path) {
+                if (path instanceof RegExp) {
+                    ignores.push(path);
+                } else if (typeof path == 'string') {
+                    ignores.push(pathToRegexp(path));
+                } else {
+                    throw new Error('unsupported path type: ' + path);
+                }
+            },
+            check: function (path) {
+                for (let i = 0; i < ignores.length; i++) {
+                    if (ignores[i].test(path)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
     }
 
-    get show () { return this.paths; }
+    get path () { return paths; }
+    get ignores () { return ignores; }
 
     check (path) {
-        for (let i = 0; i < this.paths.length; i++) {
-            if (this.paths[i].test(path)) {
+        for (let i = 0; i < paths.length; i++) {
+            if (paths[i].test(path)) {
                 return true;
             }
         }
@@ -28,9 +49,9 @@ module.exports = class PathListCheck {
 
     add (path) {
         if (path instanceof RegExp) {
-            this.paths.push(path);
+            paths.push(path);
         } else if (typeof path == 'string') {
-            this.paths.push(pathToRegexp(path));
+            paths.push(pathToRegexp(path));
         } else {
             throw new Error('unsupported path type: ' + path);
         }

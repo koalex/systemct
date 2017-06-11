@@ -18,8 +18,9 @@ import CircularProgress                                     from 'material-ui/Ci
 import App                                                  from './App';
 import Signin                                               from './components/signin/Signin';
 import Users                                                from './containers/Users';
-import Dictionaries                                         from './containers/Dictionaries';
-import { authCheck }                                        from './actions';
+// import Dictionaries                                         from './containers/Dictionaries';
+import UGO                                                  from './components/dictionaries/UGO';
+import { authCheck/*, dictionaryCreate, dictionaryRead*/ }      from './actions';
 
 import io                                                   from 'socket.io-client/socket.io.min.js';
 const socketPublic  = io.connect('/', { 'transports': ['websocket'] });
@@ -36,7 +37,7 @@ import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup'
 
 
 // @withRouter
-@connect(state => ({ common: state.common }), { authCheck })
+@connect(state => ({ common: state.common }), { authCheck/*, dictionaryCreate*/ })
 export default class Routes extends Component {
     constructor (...props) {
         super(...props);
@@ -46,7 +47,8 @@ export default class Routes extends Component {
 
     static propTypes = {
         common: PropTypes.object,
-        authCheck: PropTypes.func
+        authCheck: PropTypes.func,
+        // dictionaryCreate: PropTypes.func
     };
 
     componentWillMount () { this.props.authCheck(); }
@@ -75,12 +77,12 @@ export default class Routes extends Component {
                                     transitionEnterTimeout={ 300 }
                                     transitionLeaveTimeout={ 250 }
                                 >
-                                    <Route key={ props.location.key + 1 } path="/dictionaries/ugo"  render={ props => <h1>УГО</h1> }/>
-                                    <Route key={ props.location.key + 2 } path="/dictionaries/sensors"  render={ props => <h1>Датчики</h1> }/>
-                                    <Route key={ props.location.key + 3 } path="/dictionaries/devices"  render={ props => <h1>Устройства</h1> }/>
-                                    <Route key={ props.location.key + 4 } path="/users"  render={ props => <Users {...props} socket={ connectToSocketAPI() }></Users> }/>
-                                    <Route key={ props.location.key + 5 } path="/charts"  render={ props => <img src="http://st.depositphotos.com/1010338/2980/v/950/depositphotos_29806589-stock-illustration-infographics-vector-flat-design-financial.jpg"
-                                                                                                                 alt=""/> }/>
+
+                                    <Route key={ props.location.key + 11 } path="/dictionaries/ugo"  render={ props => <UGO socket={ connectToSocketAPI() } {...props}></UGO> }/>
+                                    <Route key={ props.location.key + 3 } path="/dictionaries/sensors"  render={ props => <h1>Датчики</h1> }/>
+                                    <Route key={ props.location.key + 4 } path="/dictionaries/devices"  render={ props => <h1>Устройства</h1> }/>
+                                    <Route key={ props.location.key + 5 } path="/users"  render={ props => <Users {...props} socket={ connectToSocketAPI() }></Users> }/>
+                                    <Route key={ props.location.key + 6 } path="/charts"  render={ props => <img src="http://st.depositphotos.com/1010338/2980/v/950/depositphotos_29806589-stock-illustration-infographics-vector-flat-design-financial.jpg" alt=""/> }/>
                                 </CSSTransitionGroup>
 
                             </App> : <Redirect to={{
