@@ -174,7 +174,7 @@ exports.read = async ctx => {
     const permission = abac.can(ctx.state.user.role).readAny('ugo');
 
     if (permission.granted) {
-        ctx.body = await Ugo.find().sort('-title').lean().exec();
+        ctx.body = await Ugo.find().sort('title').lean().exec();
     } else {
         ctx.throw(403);
     }
