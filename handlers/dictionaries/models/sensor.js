@@ -14,7 +14,7 @@ const history  = require('mongoose-version');
 const sensorSchema = new mongoose.Schema({
         title: { type: String, trim: true, required: 'SENSOR_TITLE_REQUIRED' },
         designation: { type: String, trim: true },
-        ugo: { type: mongoose.Schema.Types.ObjectId, ref: 'UGO' },
+        img: { type: String },
 
         last_updated_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         last_updated_at: { type: Date, required: true, default: Date.now },

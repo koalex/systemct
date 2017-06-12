@@ -20,6 +20,7 @@ import Signin                                               from './components/s
 import Users                                                from './containers/Users';
 // import Dictionaries                                         from './containers/Dictionaries';
 import UGO                                                  from './components/dictionaries/UGO';
+import Sensors                                                  from './components/dictionaries/Sensors';
 import { authCheck/*, dictionaryCreate, dictionaryRead*/ }      from './actions';
 
 import io                                                   from 'socket.io-client/socket.io.min.js';
@@ -79,7 +80,7 @@ export default class Routes extends Component {
                                 >
 
                                     <Route key={ props.location.key + 11 } path="/dictionaries/ugo"  render={ props => <UGO socket={ connectToSocketAPI() } {...props}></UGO> }/>
-                                    <Route key={ props.location.key + 3 } path="/dictionaries/sensors"  render={ props => <h1>Датчики</h1> }/>
+                                    <Route key={ props.location.key + 3 } path="/dictionaries/sensors"  render={ props => <Sensors socket={ connectToSocketAPI() } {...props}></Sensors> }/>
                                     <Route key={ props.location.key + 4 } path="/dictionaries/devices"  render={ props => <h1>Устройства</h1> }/>
                                     <Route key={ props.location.key + 5 } path="/users"  render={ props => <Users {...props} socket={ connectToSocketAPI() }></Users> }/>
                                     <Route key={ props.location.key + 6 } path="/charts"  render={ props => <img src="http://st.depositphotos.com/1010338/2980/v/950/depositphotos_29806589-stock-illustration-infographics-vector-flat-design-financial.jpg" alt=""/> }/>

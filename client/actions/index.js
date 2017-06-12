@@ -1,6 +1,6 @@
 'use strict';
 
-import { AUTH, _IMPORT, _EXPORT, _CHECK, SIGNOUT, MODAL, _SHOW, _HIDE, SIGNIN, USERS, DICTIONARY, UGO, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
+import { AUTH, _IMPORT, _EXPORT, _CHECK, SIGNOUT, MODAL, _SHOW, _HIDE, SIGNIN, USERS, DICTIONARY, UGO, SENSOR, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
 
 export function dispatch (data) {
     const { type, ...rest } = data;
@@ -141,6 +141,23 @@ export function dictionaryCreate (data) {
             };
 
         break;
+
+        case 'sensor':
+            return {
+                type: DICTIONARY + SENSOR + _CREATE,
+                data: data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/sensors',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                },
+
+            };
+
+            break;
     }
 
 }
@@ -156,6 +173,19 @@ export function dictionaryRead (dictionary) {
                 },
 
             };
+
+            break;
+
+        case 'sensor':
+            return {
+                type: DICTIONARY + SENSOR + _READ,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/sensors',
+                    method: 'GET'
+                },
+
+            };
+
             break;
 
     }
@@ -171,6 +201,23 @@ export function dictionaryUpdate (data) {
                 skipSuccess: data.skipSuccess,
                 CALL_API: {
                     endpoint: '/api/dictionaries/ugo/' + data.ugoId,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    method: 'PUT'
+                },
+
+            };
+
+            break;
+
+        case 'sensor':
+            return {
+                type: DICTIONARY + SENSOR + _UPDATE,
+                data: data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/sensors/' + data.sensorId,
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -200,6 +247,20 @@ export function dictionaryDelete (data) {
 
             break;
 
+        case 'sensor':
+            return {
+                type: DICTIONARY + SENSOR + _DELETE,
+                data: { sensorId: data.sensorId },
+                // skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/sensors/' + data.sensorId,
+                    method: 'DELETE'
+                },
+
+            };
+
+            break;
+
     }
 }
 
@@ -211,6 +272,19 @@ export function dictionaryExport (dictionary, filename) {
                 filename: filename,
                 CALL_API: {
                     endpoint: '/api/dictionaries/ugo/export',
+                    method: 'GET'
+                },
+
+            };
+
+            break;
+
+        case 'sensor':
+            return {
+                type: DICTIONARY + SENSOR + _EXPORT,
+                filename: filename,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/sensors/export',
                     method: 'GET'
                 },
 
@@ -229,6 +303,23 @@ export function dictionaryImport (data) {
                 skipSuccess: data.skipSuccess,
                 CALL_API: {
                     endpoint: '/api/dictionaries/ugo/import',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    method: 'POST'
+                },
+
+            };
+
+            break;
+
+        case 'sensor':
+            return {
+                type: DICTIONARY + SENSOR + _IMPORT,
+                data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/sensors/import',
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },

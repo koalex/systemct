@@ -267,7 +267,7 @@ export default class _UGO extends Component {
                                rowsMax={ 5 }
                                multiLine={ true }
                                defaultValue={ reducer.ugo.description }
-                               onBlur={ () => { this.inputChange({ componentName: 'addEditUGO', title: this.refs.ugoDescription.input.refs.input.value }); } }
+                               onBlur={ () => { this.inputChange({ componentName: 'addEditUGO', description: this.refs.ugoDescription.input.refs.input.value }); } }
                                name="description"
                                ref="ugoDescription"
                                disabled={ reducer.isLoading }

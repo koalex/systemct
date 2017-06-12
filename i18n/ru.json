@@ -83,5 +83,7 @@
 	"Unexpected token }": "Unexpected token }",
 	"Cannot read property 'filename' of undefined": "Cannot read property 'filename' of undefined",
 	"callback is not a function": "callback is not a function",
-	"Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }": "Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }"
+	"Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }": "Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }",
+	"Cannot find module '../models/semsor'": "Cannot find module '../models/semsor'",
+	"sensor is not defined": "sensor is not defined"
 }

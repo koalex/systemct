@@ -18,6 +18,7 @@ const AUTH            = 'AUTH:';
 const USERS           = 'USERS:';
 const DICTIONARY      = 'DICTIONARY:';
 const UGO             = 'UGO:';
+const SENSOR          = 'SENSOR:';
 const MODAL           = 'MODAL:';
 const ACTIVITY        = 'ACTIVITY:';
 
@@ -44,6 +45,7 @@ module.exports = {
     USERS,
     DICTIONARY,
     UGO,
+    SENSOR,
     ACTIVITY,
     MODAL,
 

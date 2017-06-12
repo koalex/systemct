@@ -8,7 +8,6 @@
 'use strict';
 
 const fs            = require('fs');
-const zlib          = require('zlib');
 const tar           = require('tar-fs')
 const path          = require('path');
 const basename      = path.basename;
@@ -81,7 +80,7 @@ exports.imports = async ctx => {
 
     const { files, fields } = await ctx.multipartParser.parse(ctx);
 
-    if (!files || !Array.isArray(files) || !files.length) {
+    if (!files || !Array.isArray(files) || !files.length || extname(files[0].filename) !== '.tar') {
         ctx.throw(400);
     }
 
@@ -99,12 +98,14 @@ exports.imports = async ctx => {
 
     let ugos = await new Promise((resolve, reject) => {
         files[0].on('end', () => {
-            if (!ugoDataPath) {
-                resolve(null);
-            } else {
-                let ugos = require(ugoDataPath);
-                resolve(ugos);
-            }
+            setTimeout(() => {
+                if (!ugoDataPath) {
+                    resolve(null);
+                } else {
+                    let ugos = require(ugoDataPath);
+                    resolve(ugos);
+                }
+            }, 1000);
         })
     });
 

@@ -45,6 +45,7 @@ class MultipartParser extends PathListCheck {
 const multipartParser = new MultipartParser();
 
 multipartParser.add(/\/api\/v?[0-9]{0,2}\/?dictionaries\/ugo\/?[a-z0-9]*/);
+multipartParser.add(/\/api\/v?[0-9]{0,2}\/?dictionaries\/sensors\/?[a-z0-9]*/);
 multipartParser.ignore.add(/\/api\/v?[0-9]{0,2}\/?dictionaries\/[a-z]{1,100}\/import/);
 
 module.exports = async (ctx, next) => {

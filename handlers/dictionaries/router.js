@@ -25,11 +25,13 @@ Api.get('/ugo/:id',     ugo.read);
 Api.put('/ugo/:id',     ugo.update);
 Api.del('/ugo/:id',     ugo.delete);
 
-Api.post('/sensors',    sensor.create);
-Api.get('/sensors',     sensor.read);
-Api.get('/sensors/:id', sensor.read);
-Api.put('/sensors/:id', sensor.update);
-Api.del('/sensors/:id', sensor.delete);
+Api.post('/sensors',        sensor.create);
+Api.get('/sensors',         sensor.read);
+Api.get('/sensors/export',  sensor.export);
+Api.post('/sensors/import',  sensor.imports);
+Api.get('/sensors/:id',     sensor.read);
+Api.put('/sensors/:id',     sensor.update);
+Api.del('/sensors/:id',     sensor.delete);
 
 Api.post('/devices',    device.create);
 Api.get('/devices',     device.read);
