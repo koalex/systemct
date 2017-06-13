@@ -11,6 +11,7 @@ const _SHOW           = '_SHOW';
 const _HIDE           = '_HIDE';
 const _CLEAR          = '_CLEAR';
 const _DROP           = '_DROP';
+const _CHANGE         = '_CHANGE';
 const _IMPORT         = '_IMPORT';
 const _EXPORT         = '_EXPORT';
 
@@ -19,6 +20,7 @@ const USERS           = 'USERS:';
 const DICTIONARY      = 'DICTIONARY:';
 const UGO             = 'UGO:';
 const SENSOR          = 'SENSOR:';
+const DEVICE          = 'DEVICE:';
 const MODAL           = 'MODAL:';
 const ACTIVITY        = 'ACTIVITY:';
 
@@ -38,6 +40,7 @@ module.exports = {
     _HIDE,
     _CLEAR,
     _DROP,
+    _CHANGE,
     _IMPORT,
     _EXPORT,
 
@@ -46,6 +49,7 @@ module.exports = {
     DICTIONARY,
     UGO,
     SENSOR,
+    DEVICE,
     ACTIVITY,
     MODAL,
 

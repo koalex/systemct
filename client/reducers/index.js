@@ -7,5 +7,6 @@ import auth                 from './auth';
 import users                from './users';
 import ugo                  from './ugo';
 import sensors              from './sensors';
+import devices              from './devices';
 
-export default combineReducers({ common, auth, users, ugo, sensors, modal });
+export default combineReducers({ common, auth, users, ugo, sensors, devices, modal });

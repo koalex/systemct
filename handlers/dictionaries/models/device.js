@@ -14,14 +14,15 @@ const history  = require('mongoose-version');
 const deviceSchema = new mongoose.Schema({
         title: { type: String, trim: true, required: 'DEVICE_TITLE_REQUIRED' },
         sensors: [{
-            param: { type: String, trim: true, required: 'REGISTER_PARAM_REQUIRED' }, // or sensor title
-            description: { type: String, trim: true },
-            dataType: { type: String, trim: true },
+            _id: { type: mongoose.Schema.ObjectId, required: true, default: mongoose.Types.ObjectId },
+            title: { type: String },
+            img: { type: String },
+            dataType: { type: String },
             bytes: { type: Number },
-            access: { type: String, trim: true },
-            note: { type: String, trim: true },
-            registers: [{ type: Number }]
+            permission: { type: String },
+            registers: [{ type: String }]
         }],
+        img: { type: String },
 
         last_updated_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
         last_updated_at: { type: Date, required: true, default: Date.now },
@@ -37,6 +38,29 @@ const deviceSchema = new mongoose.Schema({
         minimize: true,
         retainKeyOrder: true
     });
+
+deviceSchema.pre('save', function () {
+    if (Array.isArray(this.sensors) && this.sensors.length) {
+        for (let i = 0, l = this.sensors.length; i < l; i++) {
+            if (!mongoose.Types.ObjectId.isValid(this.sensors[i]._id)) {
+                this.sensors[i]._id = undefined; // or mongoose.Types.ObjectId()
+            }
+        }
+    }
+});
+
+/*userSchema.virtual('password')
+    .set(function (password) {
+        if (!password || String(password).trim() === '') {
+            this.invalidate('password', 'PASSWORD_REQUIRED');
+            return;
+        }
+        this._password     = password;
+        this.salt          = crypto.randomBytes(config.crypto.hash.length).toString('base64');
+        this.password_hash = crypto.pbkdf2Sync(password, this.salt, config.crypto.hash.iterations, config.crypto.hash.length, 'sha512');
+    })
+    .get(function () { return this._password; });*/
+// mongoose.Types.ObjectId.isValid('53cb6b9b4f4ddef1ad47f943')
 
 deviceSchema.methods.toJSON = function () {
     let data = this.toObject();

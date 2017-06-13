@@ -1,6 +1,6 @@
 'use strict';
 
-import { AUTH, _IMPORT, _EXPORT, _CHECK, SIGNOUT, MODAL, _SHOW, _HIDE, SIGNIN, USERS, DICTIONARY, UGO, SENSOR, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
+import { AUTH, _IMPORT, _EXPORT, _CHECK, SIGNOUT, MODAL, _SHOW, _HIDE, _CHANGE, SIGNIN, USERS, DICTIONARY, UGO, SENSOR, DEVICE, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
 
 export function dispatch (data) {
     const { type, ...rest } = data;
@@ -158,6 +158,23 @@ export function dictionaryCreate (data) {
             };
 
             break;
+
+        case 'device':
+            return {
+                type: DICTIONARY + DEVICE + _CREATE,
+                data: data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/devices',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                },
+
+            };
+
+            break;
     }
 
 }
@@ -181,6 +198,18 @@ export function dictionaryRead (dictionary) {
                 type: DICTIONARY + SENSOR + _READ,
                 CALL_API: {
                     endpoint: '/api/dictionaries/sensors',
+                    method: 'GET'
+                },
+
+            };
+
+            break;
+
+        case 'device':
+            return {
+                type: DICTIONARY + DEVICE + _READ,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/devices',
                     method: 'GET'
                 },
 
@@ -218,6 +247,23 @@ export function dictionaryUpdate (data) {
                 skipSuccess: data.skipSuccess,
                 CALL_API: {
                     endpoint: '/api/dictionaries/sensors/' + data.sensorId,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    method: 'PUT'
+                },
+
+            };
+
+            break;
+
+        case 'device':
+            return {
+                type: DICTIONARY + DEVICE + _UPDATE,
+                data: data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/devices/' + data.deviceId,
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -329,6 +375,27 @@ export function dictionaryImport (data) {
             };
 
             break;
+    }
+}
+
+export function setCurrentDevice (deviceId) {
+    return {
+        type: DEVICE + _CHANGE,
+        data: deviceId
+    }
+}
+
+export function addDeviceSensor (sensor) { // FIXME: emove
+    return {
+        type: DEVICE + SENSOR + _CREATE,
+        data: sensor
+    }
+}
+
+export function deviceSensorEdit (sensor) {
+    return {
+        type: DEVICE + SENSOR + _UPDATE,
+        data: sensor
     }
 }
 

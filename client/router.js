@@ -21,6 +21,7 @@ import Users                                                from './containers/U
 // import Dictionaries                                         from './containers/Dictionaries';
 import UGO                                                  from './components/dictionaries/UGO';
 import Sensors                                                  from './components/dictionaries/Sensors';
+import Devices                                                  from './components/dictionaries/Devices';
 import { authCheck/*, dictionaryCreate, dictionaryRead*/ }      from './actions';
 
 import io                                                   from 'socket.io-client/socket.io.min.js';
@@ -68,7 +69,7 @@ export default class Routes extends Component {
                 <div style={{ height: '100%' }}>
                     <Route
                         path='/'
-                        render={ props => this.props.common.isAuthenticated ?
+                        render={ props => true ?
                             <App {...props} socket={ connectToSocketAPI() }>
 
                                 <CSSTransitionGroup
@@ -81,7 +82,7 @@ export default class Routes extends Component {
 
                                     <Route key={ props.location.key + 11 } path="/dictionaries/ugo"  render={ props => <UGO socket={ connectToSocketAPI() } {...props}></UGO> }/>
                                     <Route key={ props.location.key + 3 } path="/dictionaries/sensors"  render={ props => <Sensors socket={ connectToSocketAPI() } {...props}></Sensors> }/>
-                                    <Route key={ props.location.key + 4 } path="/dictionaries/devices"  render={ props => <h1>Устройства</h1> }/>
+                                    <Route key={ props.location.key + 4 } path="/dictionaries/devices"  render={ props => <Devices socket={ connectToSocketAPI() } {...props}></Devices> }/>
                                     <Route key={ props.location.key + 5 } path="/users"  render={ props => <Users {...props} socket={ connectToSocketAPI() }></Users> }/>
                                     <Route key={ props.location.key + 6 } path="/charts"  render={ props => <img src="http://st.depositphotos.com/1010338/2980/v/950/depositphotos_29806589-stock-illustration-infographics-vector-flat-design-financial.jpg" alt=""/> }/>
                                 </CSSTransitionGroup>

@@ -1,0 +1,80 @@
+:local(.devices-table-wrapper)
+  min-width 1040px
+  height 100%
+  > div:first-child
+    height calc(100% - 60px) !important
+
+:local(.devices-select-btn)
+  position fixed !important
+  bottom 10px
+  right 20px
+  z-index 999
+
+:local(.devices-add-btn)
+  position fixed
+  bottom 10px
+  right 100px
+  z-index 999
+
+:local(.sensors-add-btn)
+  position fixed !important
+  bottom 10px
+  right 180px
+  z-index 999
+
+:local(.devices-download-btn)
+  position fixed
+  bottom 10px
+  right 260px
+  z-index 999
+
+:local(.devices-upload-btn)
+  position fixed !important
+  bottom 10px
+  right 340px
+  z-index 999
+
+:local(.devices-download-btn)
+  position fixed
+  bottom 10px
+  right 420px
+  z-index 999
+
+:local(.device-dropzone-preview)
+  max-width 200px
+  max-height 200px
+
+:local(.device-dropzone)
+  display flex
+  justify-content center
+  align-items center
+  width 200px
+  height 200px
+
+:local(.device-add-content)
+  display flex
+  @media screen and (max-width: 700px)
+    flex-direction column
+    align-items center
+
+:local(.device-dropzone-cover)
+  width 200px !important
+  height 200px !important
+  > path
+    fill #ccc
+
+:local(.current-device)
+  position fixed !important
+  bottom 15px
+  left 20px
+  z-index 999
+
+:local(.no-devices)
+  position fixed
+  top calc(50% - 20px)
+  width 100%
+  font-family Helvetica, Arial, sans-serif
+  font-size 20px
+  color #aaa
+  font-weight bold
+  text-align center

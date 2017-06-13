@@ -33,11 +33,13 @@ Api.get('/sensors/:id',     sensor.read);
 Api.put('/sensors/:id',     sensor.update);
 Api.del('/sensors/:id',     sensor.delete);
 
-Api.post('/devices',    device.create);
-Api.get('/devices',     device.read);
-Api.get('/devices/:id', device.read);
-Api.put('/devices/:id', device.update);
-Api.del('/devices/:id', device.delete);
+Api.post('/devices',        device.create);
+Api.get('/devices',         device.read);
+Api.get('/devices/export',  device.export);
+Api.post('/devices/import',  device.imports);
+Api.get('/devices/:id',     device.read);
+Api.put('/devices/:id',     device.update);
+Api.del('/devices/:id',     device.delete);
 
 
 router.use(Api.routes());
