@@ -55,11 +55,19 @@ export default function (state = defaultState, action) {
 
             nextState.device.sensors = nextState.device.sensors.map(sensor => {
                 if (sensor._id === data._id) {
-                    return Object.assign({}, sensor, { editMode: true });
+                    return Object.assign(sensor, data, { editMode: true });
                 }
-
-                return Object.assign({}, sensor, { editMode: false })
+                return sensor;
             });
+
+            return nextState;
+
+            break;
+
+        case DEVICE + SENSOR + _DELETE:
+            nextState = Object.assign({}, state);
+
+            nextState.device.sensors = nextState.device.sensors.filter(sensor => sensor._id !== data._id);
 
             return nextState;
 
@@ -178,12 +186,20 @@ export default function (state = defaultState, action) {
                 return newItem;
             });
 
-            return Object.assign({}, state, {
+            nextState = Object.assign({}, state, {
                 items,
                 isLoading: false,
                 error: false,
                 errors: {}
             });
+
+            if (payload._id === state.device._id) {
+                nextState.device =  Object.assign(nextState.device, payload, {
+                    sensors: payload.sensors.map(s => Object.assign({}, s))
+                })
+            }
+
+            return nextState;
 
             break;
 
@@ -230,6 +246,10 @@ export default function (state = defaultState, action) {
 
             return Object.assign({}, state, {
                 items: state.items.map(item => Object.assign({}, item)).filter(item => item._id !== tmp._id),
+                device: {
+                    files: [],
+                    sensors: []
+                },
                 isLoading: false,
                 errors: {},
                 error: false
@@ -315,7 +335,7 @@ export default function (state = defaultState, action) {
             if (state.device.files[0]) window.URL.revokeObjectURL(state.device.files[0].preview);
 
             if ('ADD_DEVICE' === data.modalType) return Object.assign({}, state, {
-                device: { files: [] },
+                device: state.device._id ? state.device : { files: [] },
                 dialog: { isOpen: false },
                 error: false,
                 errors: {}

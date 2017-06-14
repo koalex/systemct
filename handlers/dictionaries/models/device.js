@@ -14,7 +14,8 @@ const history  = require('mongoose-version');
 const deviceSchema = new mongoose.Schema({
         title: { type: String, trim: true, required: 'DEVICE_TITLE_REQUIRED' },
         sensors: [{
-            _id: { type: mongoose.Schema.ObjectId, required: true, default: mongoose.Types.ObjectId },
+            default: [],
+            _id: { type: String, required: true },
             title: { type: String },
             img: { type: String },
             dataType: { type: String },
@@ -39,14 +40,15 @@ const deviceSchema = new mongoose.Schema({
         retainKeyOrder: true
     });
 
-deviceSchema.pre('save', function () {
+deviceSchema.pre('save', function (next) {
     if (Array.isArray(this.sensors) && this.sensors.length) {
         for (let i = 0, l = this.sensors.length; i < l; i++) {
             if (!mongoose.Types.ObjectId.isValid(this.sensors[i]._id)) {
-                this.sensors[i]._id = undefined; // or mongoose.Types.ObjectId()
+                delete this.sensors[i]._id; // or mongoose.Types.ObjectId()
             }
         }
     }
+    next();
 });
 
 /*userSchema.virtual('password')

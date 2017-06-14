@@ -85,5 +85,9 @@
 	"callback is not a function": "callback is not a function",
 	"Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }": "Can't canonicalize query: BadValue Unsupported projection option: sort: { title: -1 }",
 	"Cannot find module '../models/semsor'": "Cannot find module '../models/semsor'",
-	"sensor is not defined": "sensor is not defined"
+	"sensor is not defined": "sensor is not defined",
+	"Sensor is not defined": "Sensor is not defined",
+	"Cast to Array failed for value \"[object Object]\" at path \"sensors\"": "Cast to Array failed for value \"[object Object]\" at path \"sensors\"",
+	"Cast to ObjectID failed for value \"4d943a4b-b958-404d-a325-1fe8ed49177c\" at path \"_id\"": "Cast to ObjectID failed for value \"4d943a4b-b958-404d-a325-1fe8ed49177c\" at path \"_id\"",
+	"Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Device\"": "Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Device\""
 }

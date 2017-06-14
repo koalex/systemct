@@ -22,11 +22,12 @@ import Chip from 'material-ui/Chip';
 import Avatar from 'material-ui/Avatar';
 
 import EditIcon                from 'material-ui/svg-icons/editor/mode-edit';
-import CheckIcon                from 'material-ui/svg-icons/navigation/check';
+import SaveIcon                from 'material-ui/svg-icons/content/save';
 import DeleteIcon                from 'material-ui/svg-icons/action/delete';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import SensorIcon           from 'material-ui/svg-icons/hardware/memory';
 import DevicesIcon          from 'material-ui/svg-icons/device/devices';
+import ArrDownIcon          from 'material-ui/svg-icons/navigation/arrow-downward';
 import { blue300, indigo900 } from 'material-ui/styles/colors';
 
 import Dropzone from 'react-dropzone'
@@ -41,7 +42,7 @@ import Paper from 'material-ui/Paper';
 import CircularProgress                                     from 'material-ui/CircularProgress';
 
 import { connect }              from 'react-redux';
-import { deviceSensorEdit, addDeviceSensor, setCurrentDevice, dictionaryCreate, dictionaryRead, dictionaryUpdate, dictionaryDelete, dictionaryExport, dictionaryImport, modalShow, modalHide, inputChange, dispatch } from '../../actions';
+import { deviceSensorDelete, deviceSensorEdit, addDeviceSensor, setCurrentDevice, dictionaryCreate, dictionaryRead, dictionaryUpdate, dictionaryDelete, dictionaryExport, dictionaryImport, modalShow, modalHide, inputChange, dispatch } from '../../actions';
 import { DICTIONARY, UGO, SENSOR, DEVICE, MODAL, _DROP, _CREATE, _UPDATE, _DELETE, _IMPORT, _SUCCESS, _ERROR, _CLEAR, _HIDE } from '../../actions/constants';
 
 
@@ -49,18 +50,19 @@ import { DICTIONARY, UGO, SENSOR, DEVICE, MODAL, _DROP, _CREATE, _UPDATE, _DELET
     state => {
         const { ugo, sensors, devices, modal, common } = state;
         return { ugo, sensors, devices, modal, common };
-    }, { deviceSensorEdit, addDeviceSensor, setCurrentDevice, dictionaryCreate, dictionaryRead, dictionaryUpdate, dictionaryDelete, dictionaryExport, dictionaryImport, modalShow, modalHide, inputChange, dispatch }
+    }, { deviceSensorDelete, deviceSensorEdit, addDeviceSensor, setCurrentDevice, dictionaryCreate, dictionaryRead, dictionaryUpdate, dictionaryDelete, dictionaryExport, dictionaryImport, modalShow, modalHide, inputChange, dispatch }
 )
 export default class _Device extends Component {
     constructor(...props) {
         super(...props);
-        this.state = { files: [] };
+        this.state = { files: [], currentSensor: null, registerDialog: false, registerValue: null };
     }
     static propTypes = {
         ugo: PropTypes.object,
         sensors: PropTypes.object,
         devices: PropTypes.object,
 
+        deviceSensorDelete: PropTypes.func,
         deviceSensorEdit: PropTypes.func,
         addDeviceSensor: PropTypes.func, // FIXME: remove
         setCurrentDevice: PropTypes.func,
@@ -78,7 +80,7 @@ export default class _Device extends Component {
 
     socketListensers = {
         [DEVICE + MODAL + _HIDE]: () => {
-            this.props.modalHide({ modalType: 'ADD_EDIT_DEVICE' })
+            this.props.modalHide({ modalType: 'ADD_DEVICE' })
         },
         [DICTIONARY + DEVICE + _CREATE + _SUCCESS]: device => {
             this.props.dispatch({
@@ -173,9 +175,15 @@ export default class _Device extends Component {
         this.props.inputChange(data)
     };
 
-    submit = () => {
-        let title           = this.refs.deviceTitle.input.value;
-        let files           = this.props.devices.device.files;
+    submit = device => {
+        let title, files;
+
+        if (! this.props.devices.device._id) {
+            title = this.refs.deviceTitle.input.value;
+        }
+        files = this.props.devices.device.files;
+
+
         let data = {
             dictionary: 'device',
             body: {
@@ -185,9 +193,9 @@ export default class _Device extends Component {
         };
 
         if (files && files.length) data.body.files = files;
-
         if (this.props.devices.device._id) {
             data.deviceId = this.props.devices.device._id;
+            data.body = this.props.devices.device;
             this.props.dictionaryUpdate(data);
         } else {
             this.props.dictionaryCreate(data);
@@ -197,7 +205,7 @@ export default class _Device extends Component {
     render () {
         const reducer = this.props.devices;
         const sensors = this.props.sensors.items.map(sensor => {
-            return (<MenuItem onTouchTap={ () => { this.addSensor(sensor); } } key={ sensor._id } style={{ display: 'flex', alignItems: 'center' }}>
+            return (<MenuItem onTouchTap={ () => { this.addSensor(sensor); this.submit(); } } key={ sensor._id } style={{ display: 'flex', alignItems: 'center' }}>
                 <Chip>
                     <Avatar src={ sensor.img } />
                     { sensor.title }
@@ -212,6 +220,15 @@ export default class _Device extends Component {
                 onTouchTap={ this.submit }
                 disabled={ reducer.isLoading }
             />,
+            reducer.device._id ? <FlatButton
+                label="Удалить"
+                secondary={ true }
+                keyboardFocused={ false }
+                onTouchTap={ () => {
+                    this.props.dictionaryDelete({ dictionary: 'device', deviceId: reducer.device._id, skipSuccess: true })
+                } }
+                disabled={ reducer.isLoading }
+            /> : null,
             <FlatButton
                 label="Отмена"
                 primary={ true }
@@ -221,8 +238,67 @@ export default class _Device extends Component {
             />
 
         ];
+
+        const registersActions = [
+            <FlatButton
+                label="OK"
+                primary={ true }
+                keyboardFocused={ false }
+                onTouchTap={ () => {
+                    if (!this.state.registerValue || !this.state.registerValue.trim()) {
+                        this.setState(Object.assign({}, this.state, {
+                            registerError: 'не заполнено'
+                        }));
+                        return;
+                    }
+
+                    if (isNaN(this.state.registerValue)) {
+                        this.setState(Object.assign({}, this.state, {
+                            registerError: 'некорректный регистр'
+                        }));
+                        return;
+                    }
+
+                    if (Array.isArray(this.state.currentSensor.registers)) {
+                        if (this.state.currentSensor.registers.some(r => Number(r) === Number(this.state.registerValue))) {
+                            this.setState(Object.assign({}, this.state, {
+                                registerError: 'такой регистр уже есть'
+                            }));
+                            return;
+                        }
+                        this.state.currentSensor.registers.push(this.state.registerValue);
+                    } else {
+                        this.state.currentSensor.registers = [this.state.registerValue];
+                    }
+                    this.props.deviceSensorEdit( Object.assign({}, this.state.currentSensor, {
+                        registers: this.state.currentSensor.registers.map(v => v)
+                    }) );
+                    this.setState(Object.assign({}, this.state, {
+                        registerError: null,
+                        currentSensor: null,
+                        registerDialog: false,
+                        registerValue: null
+                    }))
+                } }
+                disabled={ reducer.isLoading }
+            />,
+            <FlatButton
+                label="Отмена"
+                primary={ true }
+                keyboardFocused={ false }
+                onTouchTap={ () => {
+                    this.setState(Object.assign({}, this.state, {
+                        registerError: null,
+                        currentSensor: null,
+                        registerDialog: false,
+                        registerValue: null
+                    }))
+                } }
+                disabled={ reducer.isLoading }
+            />
+        ];
+
         const chipStyle = { margin: '5px' };
-        const editMode = false;
 
         let dropzoneRef;
         let dictionaryDropzoneRef;
@@ -231,9 +307,11 @@ export default class _Device extends Component {
         const rows = reducer.device && Array.isArray(reducer.device.sensors) ? reducer.device.sensors.map((sensor, i) => {
             return (<TableRow key={ sensor._id || i }>
                 <TableRowColumn style={{ width: '50px' }}>
-                    <IconButton onTouchTap={ () => { this.props.deviceSensorEdit(sensor); } }>
-                        { !sensor.editMode ? <EditIcon/> : <CheckIcon></CheckIcon> }
-                    </IconButton>
+                    { sensor.editMode ?
+                        <IconButton onTouchTap={ this.submit }><SaveIcon/></IconButton>
+                        :
+                        <IconButton onTouchTap={ () => { this.props.deviceSensorEdit(sensor); } }><EditIcon/></IconButton>
+                    }
                 </TableRowColumn>
                 <TableRowColumn style={{ width: '240px' }}>
                     <Chip
@@ -246,17 +324,18 @@ export default class _Device extends Component {
                 {/*<TableRowColumn>Действующее значение сигнала канала</TableRowColumn>*/}
                 <TableRowColumn style={{ width: '80px' }}>
                     { sensor.editMode ? <SelectField
-                        onChange={ () => { this.inputChange({ componentName: 'editDeviceSensor', _id: sensor._id, sensorDataType: this.refs[sensor._id + 'sensorDataType'].input.value }); } }
+                        onChange={ (event, index, value) => { this.props.deviceSensorEdit( Object.assign({}, sensor, { dataType: value }) ); } }
                         name="sensorDataType"
                         ref={ sensor._id + 'sensorDataType' }
                         style={{ width: '150px' }}
+                        value={ sensor.dataType }
                         defaultValue={ sensor.dataType }
                     >
-                        <MenuItem value={ '--' } primaryText="" />
+                        <MenuItem value={ ' ' } primaryText="" />
                         <MenuItem value={ 'float' } primaryText="float" />
                         <MenuItem value={ 'double' } primaryText="double" />
                         <MenuItem value={ 'unsigned short' } primaryText="unsigned short" />
-                    </SelectField> : 'float' }
+                    </SelectField> : sensor.dataType || null }
                 </TableRowColumn>
                 <TableRowColumn style={{ width: '80px' }}>
                     { sensor.editMode ? <SelectField
@@ -265,7 +344,8 @@ export default class _Device extends Component {
                         name="sensorBytes"
                         ref={ sensor._id + 'sensorBytes' }
                         defaultValue={ sensor.bytes }
-                        onChange={ () => { this.inputChange({ componentName: 'editDeviceSensor', _id: sensor._id, sensorBytes: this.refs[sensor._id + 'sensorBytes'].input.value }); } }
+                        value={ sensor.bytes }
+                        onChange={ (event, index, value) => { this.props.deviceSensorEdit( Object.assign({}, sensor, { bytes: value }) ); } }
                     >
                         <MenuItem value={ 0 } primaryText={ null } />
                         <MenuItem value={ 1 } primaryText="1" />
@@ -284,36 +364,47 @@ export default class _Device extends Component {
                         <MenuItem value={ 14 } primaryText="14" />
                         <MenuItem value={ 15 } primaryText="15" />
                         <MenuItem value={ 16 } primaryText="16" />
-                    </SelectField> : 4 }
+                    </SelectField> : sensor.bytes || null }
 
                 </TableRowColumn>
                 <TableRowColumn style={{ width: '80px' }}>
                     { sensor.editMode ? <SelectField
                         style={{ width: '80px' }}
-                        value={ 'R' }
-                        onChange={()=>{}}
+                        defaultValue={ sensor.permission }
+                        value={ sensor.permission }
+                        onChange={ (event, index, value) => { this.props.deviceSensorEdit( Object.assign({}, sensor, { permission: value }) ); } }
+
                     >
-                        <MenuItem value={ null } primaryText={ null } />
+                        <MenuItem value={ ' ' } primaryText={ null } />
                         <MenuItem value={ 'R' } primaryText="R" />
                         <MenuItem value={ 'RW' } primaryText="RW" />
                         <MenuItem value={ 'W' } primaryText="W" />
-                    </SelectField> : 'R' }
+                    </SelectField> : sensor.permission || null }
                 </TableRowColumn>
                 <TableRowColumn>
                     { sensor.editMode ? <FloatingActionButton mini={ true } style={{ display: 'inline-block', float: 'left', margin: '5px' }}
-                        onTouchTap={ () => { } } >
+                        onTouchTap={ () => {
+                            this.setState(Object.assign({}, this.state, { registerDialog: true, currentSensor: sensor }));
+                        } } >
                         <PlusIcon />
                     </FloatingActionButton> : null  }
                     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', height: 'auto' }}>
-                        { sensor.registers ? sensor.registers.map(register => <Chip
+                        { sensor.registers ? sensor.registers.map((register, i) => <Chip
+                            key={ register + i }
                             style={ chipStyle }
-                            onRequestDelete={ sensor.editMode ? () => {} : null }
+                            onRequestDelete={ sensor.editMode ? () => {
+                                let r = sensor.registers.map(r => r);
+                                    r.splice(r.indexOf(register), 1);
+                                this.props.deviceSensorEdit( Object.assign({}, sensor, {
+                                    registers: r
+                                }) )
+                            } : null }
                             onTouchTap={ ()=>{} }
                         >{ register }</Chip>) : null }
                     </div>
                 </TableRowColumn>
                 <TableRowColumn style={{ width: '50px'}}>
-                    <IconButton onTouchTap={ () => { console.log('DELETE DEVICE SENSOR'); } }>
+                    <IconButton onTouchTap={ () => { this.props.deviceSensorDelete(sensor); this.submit(); } }>
                         <DeleteIcon></DeleteIcon>
                     </IconButton>
                 </TableRowColumn>
@@ -354,29 +445,38 @@ export default class _Device extends Component {
                     <TableBody displayRowCheckbox={ false } style={{ verticalAlign: 'middle' }}>
                         {rows}
                     </TableBody>
-                </Table> : <p className={ styles['no-devices'] }>ВЫБЕРИТЕ ИЛИ СОЗДАЙТЕ УСТРОЙСТВО</p> }
+                </Table> : reducer.isLoading ? null : reducer.items && reducer.items.length ? <p className={ styles['no-devices'] }>ВЫБЕРИТЕ УСТРОЙСТВО</p> : <p className={ styles['no-devices'] }>СОЗДАЙТЕ УСТРОЙСТВО</p> }
 
-
+                { (!rows || !rows.length) && reducer.device._id ? <p className={ styles['no-devices'] }>ДОБАВЬТЕ ДАТЧИКИ</p> : null}
                 <IconMenu
                     className={ styles['devices-select-btn'] }
-                    iconButtonElement={<FloatingActionButton><MoreVertIcon/><DevicesIcon/></FloatingActionButton>}
+                    iconButtonElement={<FloatingActionButton disabled={ reducer.isLoading || !reducer.items || !reducer.items.length }><MoreVertIcon/><DevicesIcon/></FloatingActionButton>}
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                     targetOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                     maxHeight={ 272 }
                 >
-                    {reducer.items.length ? reducer.items.map(item => <MenuItem onTouchTap={ () => { this.props.setCurrentDevice(item._id); } }>{ item.title }</MenuItem>)  : <MenuItem>
+                    {reducer.items.length ? reducer.items.map(item => <MenuItem key={ item._id } onTouchTap={ () => { this.props.setCurrentDevice(item._id); } }>{ item.title }</MenuItem>)  : <MenuItem>
                         устройства отсутствуют
                     </MenuItem> }
                 </IconMenu>
+                {
+                    !reducer.items || !reducer.items.length ? <ArrDownIcon className={ [styles['devices-add-btn-pointer'] + ' ' + styles['devices-btn-pointer']] }/> : null
+                }
+                {
+                    reducer.items.length && !reducer.device._id ? <ArrDownIcon className={ [styles['devices-select-btn-pointer'] + ' ' + styles['devices-btn-pointer']] }/> : null
+                }
+                {
+                    reducer.device._id && (!reducer.device.sensors || !reducer.device.sensors.length) ? <ArrDownIcon className={ [styles['devices-add-sensor-btn-pointer'] + ' ' + styles['devices-btn-pointer']] }/> : null
+                }
                 <FloatingActionButton
-                    disabled={ false }
+                    disabled={ reducer.isLoading }
                     onTouchTap={ () => { this.props.modalShow({ modalType: 'ADD_DEVICE' }) } }  className={ styles['devices-add-btn'] }>
                     <PlusIcon />
                     <DevicesIcon/>
                 </FloatingActionButton>
                 <IconMenu
                     className={ styles['sensors-add-btn'] }
-                    iconButtonElement={<FloatingActionButton><PlusIcon /><SensorIcon/></FloatingActionButton>}
+                    iconButtonElement={<FloatingActionButton disabled={ reducer.isLoading || !reducer.items || !reducer.items.length }><PlusIcon /><SensorIcon/></FloatingActionButton>}
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                     targetOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                     maxHeight={ 272 }
@@ -384,23 +484,99 @@ export default class _Device extends Component {
                     { reducer.device._id ? sensors : <MenuItem>не выбрано устройство</MenuItem> }
                 </IconMenu>
                 <FloatingActionButton
-                    disabled={ false }
-                    onTouchTap={ () => {} }  className={ styles['devices-upload-btn'] }>
+                    disabled={ reducer.isLoading }
+                    onTouchTap={ () => { dictionaryDropzoneRef.open() } }
+                    className={ styles['devices-upload-btn'] }>
+                    <Dropzone
+                        style={{ display: 'none' }}
+                        disabled={ reducer.isLoading }
+                        multiple={ false }
+                        ref={ node => { dictionaryDropzoneRef = node; } }
+                        accept=".tar"
+                        onDrop={ this.dictionaryImport }>
 
+                    </Dropzone>
                     <UploadIcon />
                 </FloatingActionButton>
+
                 <FloatingActionButton
-                    disabled={ false }
-                    onTouchTap={ () => {} }  className={ styles['devices-download-btn'] }>
+                    disabled={ reducer.isLoading || !reducer.items || !reducer.items.length }
+                    onTouchTap={ () => { this.props.dictionaryExport('device', 'dictionary_devices.tar'); } }
+                    className={ styles['devices-download-btn'] }>
                     <DownloadIcon />
                 </FloatingActionButton>
 
                 <Dialog
-                    title={ 'Добавить устройство' }
+                    actions={ registersActions }
+                    modal={ true }
+                    contentStyle={{ width: '304px' }}
+                    autoScrollBodyContent={ false }
+                    open={ this.state.registerDialog }
+                >
+                    <div style={{ height: '50px' }}>
+                        <TextField
+                            autoFocus
+                            onKeyPress={ ev => {
+                                if (ev.key === 'Enter') {
+                                    ev.preventDefault();
+                                    if (!this.state.registerValue || !this.state.registerValue.trim()) {
+                                        this.setState(Object.assign({}, this.state, {
+                                            registerError: 'не заполнено'
+                                        }));
+                                        return;
+                                    }
+
+                                    if (isNaN(this.state.registerValue)) {
+                                        this.setState(Object.assign({}, this.state, {
+                                            registerError: 'некорректный регистр'
+                                        }));
+                                        return;
+                                    }
+
+                                    if (Array.isArray(this.state.currentSensor.registers)) {
+                                        if (this.state.currentSensor.registers.some(r => Number(r) === Number(this.state.registerValue))) {
+                                            this.setState(Object.assign({}, this.state, {
+                                                registerError: 'такой регистр уже есть'
+                                            }));
+                                            return;
+                                        }
+                                        this.state.currentSensor.registers.push(this.state.registerValue);
+                                    } else {
+                                        this.state.currentSensor.registers = [this.state.registerValue];
+                                    }
+                                    this.props.deviceSensorEdit( Object.assign({}, this.state.currentSensor, {
+                                        registers: this.state.currentSensor.registers.map(v => v)
+                                    }) );
+                                    this.setState(Object.assign({}, this.state, {
+                                        registerError: null,
+                                        currentSensor: null,
+                                        registerDialog: false,
+                                        registerValue: null
+                                    }))
+                                }
+                            }}
+                            name="newRegisterValue"
+                            ref="newRegisterValue"
+                            onChange={ () => {
+                                this.setState(Object.assign({}, this.state, {
+                                    registerError: null,
+                                    registerValue: this.refs.newRegisterValue.input.value
+                                }))
+                            } }
+                            hintText='например 0x0001'
+                            errorText={ this.state.registerError }
+                        ></TextField>
+                    </div>
+
+                </Dialog>
+
+                <Dialog
+                    title={ reducer.device._id ? reducer.device.title.substring() : 'Добавить устройство' }
                     actions={ actions }
                     modal={ true }
                     autoScrollBodyContent={ true }
                     open={ reducer.dialog.isOpen }
+
                 >
                     <div className={ styles['device-add-content'] }>
                         <div style={ { textAlign: 'center' } }>
@@ -426,6 +602,10 @@ export default class _Device extends Component {
                         </div>
                         <div style={ { margin: '0 20px', flexGrow: 1, textAlign: 'center' } }>
                             <TextField
+                                onKeyPress={ ev => {
+                                    if (ev.key === 'Enter') this.submit();
+                                    }
+                                }
                                 style={ { textAlign: 'left' } }
                                 defaultValue={ reducer.device.title }
                                 onBlur={ () => { this.inputChange({ componentName: 'addDevice', title: this.refs.deviceTitle.input.value }); } }
@@ -441,7 +621,10 @@ export default class _Device extends Component {
 
                 { reducer.device._id ? <Chip
                     backgroundColor={ blue300 }
-                    onTouchTap={() => {} }
+                    onTouchTap={ () => { this.props.modalShow({ modalType: 'ADD_DEVICE', device: Object.assign({}, reducer.device, {
+                        files: reducer.device.files.map(f => f),
+                        sensors: reducer.device.sensors.map(s => s)
+                    }) }) } }
                     className={ styles['current-device'] }
                 >
                     <Avatar src={ reducer.device.img || null } size={ 32 } color={blue300} backgroundColor={ indigo900 }>

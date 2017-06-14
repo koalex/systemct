@@ -21,6 +21,7 @@ export default store => next => async action => {
         }, (CALL_API.headers || {}))
     };
 
+
     if (CALL_API.method.toUpperCase() !== 'GET' && CALL_API.method.toUpperCase() !== 'HEAD') {
         if (request.headers['Content-Type'] === 'application/x-www-form-urlencoded') {
             request.body = (CALL_API.body || Object.keys(rest.data).map(key => key + '=' + rest.data[key]).join('&'))

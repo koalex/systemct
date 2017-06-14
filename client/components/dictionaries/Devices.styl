@@ -16,6 +16,35 @@
   right 100px
   z-index 999
 
+:local(.devices-btn-pointer)
+  position fixed
+  width 40px !important
+  height 40px !important
+  color #aaa !important
+  bottom 70px
+  z-index 999
+  animation-name devices-btn-pointer
+  animation-duration 1s
+  animation-iteration-count infinite
+
+@keyframes devices-btn-pointer
+  0%
+    bottom 70px
+
+  50%
+    bottom 90px
+  100%
+    bottom 70px
+
+:local(.devices-add-btn-pointer)
+  right 108px
+
+:local(.devices-select-btn-pointer)
+  right 28px
+
+:local(.devices-add-sensor-btn-pointer)
+  right 188px
+
 :local(.sensors-add-btn)
   position fixed !important
   bottom 10px

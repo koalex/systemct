@@ -222,6 +222,7 @@ export function dictionaryRead (dictionary) {
 }
 
 export function dictionaryUpdate (data) {
+
     switch (data.dictionary) {
         case 'ugo':
             return {
@@ -265,7 +266,7 @@ export function dictionaryUpdate (data) {
                 CALL_API: {
                     endpoint: '/api/dictionaries/devices/' + data.deviceId,
                     headers: {
-                        'Content-Type': 'multipart/form-data',
+                        'Content-Type': data.body && Array.isArray(data.body.files) && data.body.files.length  ? 'multipart/form-data' : 'application/json',
                     },
                     method: 'PUT'
                 },
@@ -307,6 +308,20 @@ export function dictionaryDelete (data) {
 
             break;
 
+        case 'device':
+            return {
+                type: DICTIONARY + DEVICE + _DELETE,
+                data: { deviceId: data.deviceId },
+                // skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/devices/' + data.deviceId,
+                    method: 'DELETE'
+                },
+
+            };
+
+            break;
+
     }
 }
 
@@ -331,6 +346,19 @@ export function dictionaryExport (dictionary, filename) {
                 filename: filename,
                 CALL_API: {
                     endpoint: '/api/dictionaries/sensors/export',
+                    method: 'GET'
+                },
+
+            };
+
+            break;
+
+        case 'device':
+            return {
+                type: DICTIONARY + DEVICE + _EXPORT,
+                filename: filename,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/devices/export',
                     method: 'GET'
                 },
 
@@ -375,6 +403,23 @@ export function dictionaryImport (data) {
             };
 
             break;
+
+        case 'device':
+            return {
+                type: DICTIONARY + DEVICE + _IMPORT,
+                data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/devices/import',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    method: 'POST'
+                },
+
+            };
+
+            break;
     }
 }
 
@@ -395,6 +440,13 @@ export function addDeviceSensor (sensor) { // FIXME: emove
 export function deviceSensorEdit (sensor) {
     return {
         type: DEVICE + SENSOR + _UPDATE,
+        data: sensor
+    }
+}
+
+export function deviceSensorDelete (sensor) {
+    return {
+        type: DEVICE + SENSOR + _DELETE,
         data: sensor
     }
 }
