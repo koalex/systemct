@@ -278,7 +278,7 @@ export default class _Device extends Component {
 
         return (
             <div className={ styles['projects-container'] }>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', flexBasis: '250px' }}>
                     <h3 className={ styles['projects-project-devices__title'] }>
                         <div style={{ verticalAlign: 'top', display: 'inline-block', height: '48px' }}>Устройства</div>
                         { AddDeviceMenu }
@@ -420,7 +420,7 @@ export default class _Device extends Component {
                                                 <IconButton
                                                     tooltip="прочитать"
                                                     tooltipPosition="bottom-left"
-                                                    style={{ alignSelf: 'center' }}
+                                                    style={{ alignSelf: 'center', flexBasis: '72px' }}
                                                     onTouchTap={ () => { } }>
                                                         <VisibilityIcon/>
                                                 </IconButton>
