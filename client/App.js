@@ -20,6 +20,7 @@ import LibraryIcon          from 'material-ui/svg-icons/av/library-books';
 import ImageIcon            from 'material-ui/svg-icons/image/image';
 import SensorIcon           from 'material-ui/svg-icons/hardware/memory';
 import DevicesIcon          from 'material-ui/svg-icons/device/devices';
+import ProjectsIcon          from 'material-ui/svg-icons/file/folder';
 
 
 import { connect }              from 'react-redux';
@@ -98,6 +99,12 @@ export default class App extends Component {
                                     leftIcon={<DevicesIcon />}
                                     primaryText='Устройства'
                                     onTouchTap={ () => {this.props.history.push('/dictionaries/devices'); this.toggleDrawer () } }
+                                />,
+                                <ListItem
+                                    key={3568837723123}
+                                    leftIcon={<ProjectsIcon />}
+                                    primaryText='Проекты'
+                                    onTouchTap={ () => {this.props.history.push('/dictionaries/projects'); this.toggleDrawer () } }
                                 />
                             ]}
                         />

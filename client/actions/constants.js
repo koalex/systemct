@@ -21,6 +21,7 @@ const DICTIONARY      = 'DICTIONARY:';
 const UGO             = 'UGO:';
 const SENSOR          = 'SENSOR:';
 const DEVICE          = 'DEVICE:';
+const PROJECT         = 'PROJECT:';
 const MODAL           = 'MODAL:';
 const ACTIVITY        = 'ACTIVITY:';
 
@@ -50,6 +51,7 @@ module.exports = {
     UGO,
     SENSOR,
     DEVICE,
+    PROJECT,
     ACTIVITY,
     MODAL,
 

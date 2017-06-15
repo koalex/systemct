@@ -59,7 +59,7 @@ exports.export = async ctx => {
         if (devices.length) {
             devices.forEach(device => {
                 if (device.img) archive.append(fs.createReadStream( join(config.projectRoot, device.img) ), { name: basename(device.img) })
-            })
+            });
         }
 
         archive.finalize();

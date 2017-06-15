@@ -1,0 +1,57 @@
+@charset "UTF-8";
+
+/*
+  Author: ✰ Konstantin Aleksandrov ✰ https://github.com/koalex
+
+  File Structure :
+    1.  Name
+    	1.1. Sub-name
+*/
+
+/************************
+  1. Name
+************************/
+
+/* 1.1  Sub-name */
+
+:local(.projects-container)
+  display flex
+  flex-grow 1
+  font-family Helvetica, Arial, sans-serif
+  overflow hidden
+
+:local(.projects-project-devices)
+  width 250px
+  overflow auto
+  color rgba(0, 0, 0, 0.54)
+
+:local(.projects-project-devices__title)
+  flex-grow 1
+  height 48px
+  line-height 48px
+  color rgba(0, 0, 0, 0.54)
+  text-align center
+
+:local(.projects-delim)
+  border-left 1px solid #ccc
+
+:local(.projects-project-devices-list-item)
+  img + *
+    overflow hidden
+    text-overflow ellipsis
+
+:local(.projects-devices-detail)
+  position relative
+  display flex
+  flex-wrap wrap
+  flex-grow 1
+  overflow-y hidden
+  //> div
+  //  overflow-y auto !important
+  //  overflow-x hidden !important
+
+:local(.projects-project-devices__table)
+  //box-sizing border-box !important
+  //overflow-x hidden
+  //*
+  //  box-sizing border-box
