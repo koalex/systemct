@@ -70,7 +70,7 @@ export default class Routes extends Component {
                 <div style={{ height: '100%' }}>
                     <Route
                         path='/'
-                        render={ props => this.props.common.isAuthenticated ?
+                        render={ props => true ?
                             <App {...props} socket={ connectToSocketAPI() }>
 
                                 <CSSTransitionGroup

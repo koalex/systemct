@@ -21,6 +21,7 @@
   overflow hidden
 
 :local(.projects-project-devices)
+  flex-grow 99999
   overflow-x hidden
   color rgba(0, 0, 0, 0.54)
 
@@ -43,6 +44,7 @@
   position relative
   display flex
   flex-wrap wrap
+  align-content flex-start
   flex-grow 1
   flex-shrink 99
   overflow-y hidden
@@ -50,8 +52,5 @@
   //  overflow-y auto !important
   //  overflow-x hidden !important
 
-:local(.projects-project-devices__table)
-  //box-sizing border-box !important
-  //overflow-x hidden
-  //*
-  //  box-sizing border-box
+:local(.ip-address-parts)
+  display flex

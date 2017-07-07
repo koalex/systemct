@@ -2,7 +2,7 @@
 
 /*
  ================================
- ===       PROJECT MODEL       ===
+ ===       PROJECT MODEL      ===
  ================================
  */
 
@@ -10,12 +10,13 @@
 
 const mongoose = require('../../../libs/mongoose');
 const history  = require('mongoose-version');
+const numTypes = require('../../../libs/IEEE754');
 
 const projectSchema = new mongoose.Schema({
         title: { type: String, trim: true, required: 'PROJECT_TITLE_REQUIRED' },
         devices: [{
-            default: [],
-            _id: { type: mongoose.Schema.Types.ObjectId, required: 'CANNOT IDENT_DEVICE' },
+            _id: { type: String, required: 'CANNOT_IDENT_DEVICE' },
+            ip: { type: String, trim: true },
             title: { type: String, trim: true, required: 'DEVICE_TITLE_REQUIRED' },
             img: { type: String },
             sensors: [{
@@ -23,7 +24,10 @@ const projectSchema = new mongoose.Schema({
                 _id: { type: String, required: true },
                 title: { type: String },
                 img: { type: String },
-                dataType: { type: String },
+                measure: { type: String },
+                name_short: { type: String },
+                name_dispatch: { type: String },
+                dataType: { type: String, enum: Object.keys(numTypes), default: 'Float' },
                 bytes: { type: Number },
                 permission: { type: String },
                 registers: [{ type: String }]
@@ -72,7 +76,7 @@ projectSchema.methods.toJSON = function () {
 };
 
 projectSchema.plugin(history, {
-    collection: 'project_history',
+    collection: 'projects_history',
     suppressVersionIncrement: true,
     suppressRefIdIndex: false,
     strategy: 'array',

@@ -6,6 +6,8 @@ import React, { Component }     from 'react';
 import PropTypes                from 'prop-types';
 import Dropzone from 'react-dropzone'
 import Dialog from 'material-ui/Dialog';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 import TextField                from 'material-ui/TextField';
 import FlatButton from 'material-ui/FlatButton';
 import Snackbar                 from 'material-ui/Snackbar';
@@ -93,13 +95,15 @@ export default class _Sensor extends Component {
     /*shouldComponentUpdate (nextProps, nextState) { return true; }*/
 
     submit = () => {
-        let title           = this.refs.sensorTitle.input.value;
-        let sensorDesignation  = this.refs.sensorDesignation.input.refs.input.value;
-        let files           = this.props.sensors.sensor.files;
+        let title               = this.refs.sensorTitle.input.value;
+        let sensorDesignation   = this.refs.sensorDesignation.input.refs.input.value;
+        let sensorType          = this.props.sensors.sensor.type;
+        let files               = this.props.sensors.sensor.files;
         let data = {
             dictionary: 'sensor',
             body: {
                 title,
+                type: sensorType,
                 designation: sensorDesignation,
             },
             skipSuccess: true
@@ -262,10 +266,26 @@ export default class _Sensor extends Component {
                                 errorText={ reducer.errors.title }
                             />
                             <br/>
+                            <SelectField
+                                style={ { textAlign: 'left' } }
+                                value={ reducer.sensor.type }
+                                onChange={ (event, index, value) => {
+                                    this.inputChange({ componentName: 'addEditSensor', type: value });
+                                } }
+                                name="type"
+                                ref="sensorType"
+                                disabled={ reducer.isLoading }
+                                floatingLabelText="Тип Датчика"
+                                errorText={ reducer.errors.type }
+                                >
+                                <MenuItem value={ 'числовой' } primaryText="числовой" />
+                                <MenuItem value={ 'дискретный' } primaryText="дискретный" />
+                            </SelectField>
+                            <br/>
                             <TextField
                                 style={ { textAlign: 'left' } }
                                 rows={ 3 }
-                                rowsMax={ 5 }
+                                rowsMax={ 4 }
                                 multiLine={ true }
                                 defaultValue={ reducer.sensor.designation }
                                 onBlur={ () => { this.inputChange({ componentName: 'addEditSensor', designation: this.refs.sensorDesignation.input.refs.input.value }); } }

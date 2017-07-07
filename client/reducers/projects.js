@@ -1,20 +1,40 @@
 'use strict';
 
-import { DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, _CHANGE, _DROP, _CREATE, _READ,  _UPDATE, _DELETE, MODAL, _SHOW, _HIDE, _SUCCESS, _ERROR, _CLEAR, _EXPORT, _IMPORT, INPUT_CHANGE } from '../actions/constants';
+import { DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, _CHANGE, _SELECT, _DROP, _CREATE, _READ,  _UPDATE, _DELETE, MODAL, _SHOW, _HIDE, _SUCCESS, _ERROR, _CLEAR, _EXPORT, _IMPORT, INPUT_CHANGE } from '../actions/constants';
+
 const uuidV4 = require('uuid/v4');
+
 const defaultState = {
     isLoading: false,
     error: false,
     errors: {},
-    dialog: {
-        isOpen: false
+    newProject: {
+        isOpen: false,
+        title: '',
+        files: []
     },
-    device: {
-        files: [],
-        sensors: []
+    selectedProject: {
+        _id: null,
+        title: null,
+        img: null,
+        devices: []
     },
     items: []
 };
+
+function cloneProject (project) {
+    return Object.assign({}, project, {
+        devices: Array.isArray(project.devices) && project.devices.length ? project.devices.map(d => {
+            return Object.assign({}, d, {
+                sensors: Array.isArray(d.sensors) && d.sensors.length ? d.sensors.map(s => {
+                    return Object.assign({}, s, {
+                        registers: Array.isArray(s.registers) && s.registers.length ? s.registers.filter(r => r != null && r != undefined) : []
+                    });
+                }) : []
+            });
+        }) : []
+    })
+}
 
 export default function (state = defaultState, action) {
     const { data, payload, type, ...rest } = action;
@@ -24,56 +44,7 @@ export default function (state = defaultState, action) {
     switch(type) {
         default: return state;
 
-        case DEVICE + _CHANGE:
-            nextState = Object.assign({}, state);
-
-            for (let i = 0, l = nextState.items.length; i < l; i ++) {
-                if (nextState.items[i]._id === data) {
-                    nextState.device = Object.assign({}, nextState.items[i]);
-                    if (!nextState.device.files) nextState.device.files = [];
-                    break;
-                }
-            }
-
-            return nextState;
-
-        case DEVICE + SENSOR + _CREATE:
-            if (!state.device._id) return state;
-
-            nextState = Object.assign({}, state);
-
-            if (!Array.isArray(nextState.device.sensors)) nextState.device.sensors = [];
-
-            nextState.device.sensors.unshift(Object.assign({}, data, { _id: uuidV4(), editMode: false }));
-
-            return nextState;
-
-            break;
-
-        case DEVICE + SENSOR + _UPDATE:
-            nextState = Object.assign({}, state);
-
-            nextState.device.sensors = nextState.device.sensors.map(sensor => {
-                if (sensor._id === data._id) {
-                    return Object.assign(sensor, data, { editMode: true });
-                }
-                return sensor;
-            });
-
-            return nextState;
-
-            break;
-
-        case DEVICE + SENSOR + _DELETE:
-            nextState = Object.assign({}, state);
-
-            nextState.device.sensors = nextState.device.sensors.filter(sensor => sensor._id !== data._id);
-
-            return nextState;
-
-            break;
-
-        case DICTIONARY + DEVICE + _IMPORT:
+        case DICTIONARY + PROJECT + _IMPORT:
 
             return Object.assign({}, state, {
                 isLoading: true,
@@ -81,9 +52,7 @@ export default function (state = defaultState, action) {
                 errors: {}
             });
 
-            break;
-
-        case DICTIONARY + DEVICE + _IMPORT + _ERROR:
+        case DICTIONARY + PROJECT + _IMPORT + _ERROR:
 
             return Object.assign({}, state, {
                 isLoading: false,
@@ -92,197 +61,7 @@ export default function (state = defaultState, action) {
 
             break;
 
-        case DICTIONARY + DEVICE + _READ:
-            return Object.assign({}, state, {
-                isLoading: true,
-                error: false,
-                errors: {}
-            });
-
-            break;
-
-        case DICTIONARY + DEVICE + _READ + _SUCCESS:
-            return Object.assign({}, state, {
-                isLoading: false,
-                error: false,
-                items: payload
-            });
-
-            break;
-
-        case DICTIONARY + DEVICE + _READ + _ERROR:
-            return Object.assign({}, state, {
-                isLoading: false,
-                error: payload.message
-            });
-
-            break;
-
-        case  DICTIONARY + DEVICE + _CREATE:
-            return Object.assign({}, state, {
-                isLoading: true,
-                error: false,
-                errors: {},
-            });
-
-            break;
-
-        case  DICTIONARY + DEVICE + _CREATE + _SUCCESS:
-            items = state.items.map(item => Object.assign({}, item));
-            items.push(payload);
-            return Object.assign({}, state, {
-                isLoading: false,
-                items: items,
-                dialog: { isOpen: false },
-                device: state.device._id ? state.device : Object.assign({}, payload, { files: [] }),
-                error: false,
-                errors: {}
-            });
-
-            break;
-
-        case  DICTIONARY + DEVICE + _CREATE + _ERROR:
-            nextState = { errors: {}, isLoading: false };
-
-            if (Array.isArray(payload)) {
-                payload.forEach(data => {
-                    if (data.field && data.message) {
-                        nextState.errors[data.field] = data.message;
-                    }
-                });
-                return Object.assign({}, state, nextState)
-            } else if (payload.field && payload.message) {
-                return Object.assign({}, state, {
-                    errors: {
-                        [payload.field]: payload.message
-                    },
-                    isLoading: false
-                })
-            } else if (payload.message) {
-                nextState.error = payload.message;
-                return Object.assign({}, state, nextState)
-            } else {
-                return Object.assign({}, state, {
-                    error: payload,
-                    isLoading: false
-                })
-            }
-
-            break;
-
-        case  DICTIONARY + DEVICE + _UPDATE:
-            return Object.assign({}, state, {
-                isLoading: true,
-                error: false,
-                errors: {}
-            });
-
-            break;
-
-        case  DICTIONARY + DEVICE + _UPDATE + _SUCCESS:
-            items = state.items.map(item => {
-                let newItem = Object.assign(item);
-                if (newItem._id === payload._id) newItem = payload;
-                return newItem;
-            });
-
-            nextState = Object.assign({}, state, {
-                items,
-                isLoading: false,
-                error: false,
-                errors: {}
-            });
-
-            if (payload._id === state.device._id) {
-                nextState.device =  Object.assign(nextState.device, payload, {
-                    sensors: payload.sensors.map(s => Object.assign({}, s))
-                })
-            }
-
-            return nextState;
-
-            break;
-
-        case  DICTIONARY + DEVICE + _UPDATE + _ERROR:
-            nextState = { errors: {}, isLoading: false };
-
-            if (Array.isArray(payload)) {
-                payload.forEach(data => {
-                    if (data.field && data.message) {
-                        nextState.errors[data.field] = data.message;
-                    }
-                });
-                return Object.assign({}, state, nextState)
-            } else if (payload.field && payload.message) {
-                return Object.assign({}, state, {
-                    errors: {
-                        [payload.field]: payload.message,
-                    },
-                    isLoading: false
-                })
-            } else if (payload.message) {
-                nextState.error = payload.message;
-                return Object.assign({}, state, nextState)
-            } else {
-                return Object.assign({}, state, {
-                    error: payload,
-                    isLoading: false
-                })
-            }
-
-            break;
-
-        case  DICTIONARY + DEVICE + _DELETE:
-            return Object.assign({}, state, {
-                isLoading: true,
-                errors: {},
-                error: false
-            });
-
-            break;
-
-        case  DICTIONARY + DEVICE + _DELETE + _SUCCESS:
-            tmp = Object.assign({}, payload);
-
-            return Object.assign({}, state, {
-                items: state.items.map(item => Object.assign({}, item)).filter(item => item._id !== tmp._id),
-                device: {
-                    files: [],
-                    sensors: []
-                },
-                isLoading: false,
-                errors: {},
-                error: false
-            });
-
-            break;
-
-        case  DICTIONARY + DEVICE + _DELETE + _ERROR:
-            return Object.assign({}, state, {
-                isLoading: false,
-                error: payload.message
-            });
-
-            break;
-
-        case _ERROR + _CLEAR:
-            return Object.assign({}, state, {
-                error: false,
-                errors: {}
-            });
-
-        case DICTIONARY + DEVICE +_DROP:
-            nextState = Object.assign({}, state, {
-                error: false,
-                errors: {}
-            });
-            nextState.device.files = data;
-
-            return nextState;
-
-            break;
-
-        case DICTIONARY + DEVICE + _EXPORT + _ERROR:
+        case DICTIONARY + PROJECT + _EXPORT + _ERROR:
             nextState = { errors: {}, isLoading: false };
 
             if (Array.isArray(payload)) {
@@ -309,22 +88,377 @@ export default function (state = defaultState, action) {
 
             break;
 
-        case MODAL + _SHOW:
-            if ('ADD_DEVICE' === data.modalType) {
-                nextState = Object.assign({}, state, {
-                    dialog: { isOpen: true },
-                    device: data.device ? Object.assign({}, data.device) : {},
-                    error: false,
-                    errors: {}
-                });
+        case 'READ_HOLDING_REGISTERS_SUCCESS':
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: {
+                    isOpen: false,
+                    title: '',
+                    files: []
+                },
+                selectedProject: cloneProject(state.selectedProject),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
 
-                if (data.device && data.device.img) {
-                    nextState.device.files = [{ preview: data.device.img }]
-                } else {
-                    nextState.device.files = []
+            nextState.selectedProject.devices.forEach(d => {
+               if (d._id == payload.deviceId) {
+                   d.sensors.forEach(s => {
+                       if (s._id == payload.sensorId) {
+                           if (!s.registersValues) s.registersValues = {};
+                           s.registersValues[payload.register] = payload.data;
+                       }
+                   })
+               }
+            });
+
+            return nextState;
+
+            break;
+
+        case 'READ_HOLDING_REGISTERS_ERROR':
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: {
+                    isOpen: false,
+                    title: '',
+                    files: []
+                },
+                selectedProject: cloneProject(state.selectedProject),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            nextState.selectedProject.devices.forEach(d => {
+                if (d._id == payload.deviceId) {
+                    d.sensors.forEach(s => {
+                        if (s._id == payload.sensorId) {
+                            if (!s.registersValues) s.registersValues = {};
+                            s.registersValues[payload.register] = 'ошибка';
+                        }
+                    })
                 }
+            });
 
-                return nextState
+            return nextState;
+
+            break;
+        // CREATE
+
+        case  DICTIONARY + PROJECT + _CREATE:
+            return Object.assign({}, state, {
+                isLoading: true,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: cloneProject(state.selectedProject),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            break;
+
+        case  DICTIONARY + PROJECT + _CREATE + _SUCCESS:
+            if (Array.isArray(state.newProject.files) && state.newProject.files[0]) {
+                window.URL.revokeObjectURL(state.newProject.files[0].preview);
+            }
+
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: {
+                    isOpen: false,
+                    title: '',
+                    files: []
+                },
+                selectedProject: state.selectedProject._id ? cloneProject(state.selectedProject) : cloneProject(payload),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            nextState.items.push(cloneProject(payload));
+
+            return nextState;
+
+            break;
+
+        case  DICTIONARY + PROJECT + _CREATE + _ERROR:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: state.selectedProject._id ? cloneProject(state.selectedProject) : cloneProject(payload),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            if (Array.isArray(payload)) {
+                payload.forEach(data => { if (data.field && data.message) nextState.errors[data.field] = data.message; });
+            } else if (payload.field && payload.message) {
+                nextState.errors = { [payload.field]: payload.message }
+            } else if (payload.message) {
+                nextState.error = payload.message;
+            } else {
+                nextState.error = payload;
+            }
+
+            return nextState;
+
+            break;
+
+        // READ
+
+        case  DICTIONARY + PROJECT + _READ:
+            return Object.assign({}, state, {
+                isLoading: true,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: cloneProject(state.selectedProject),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            break;
+
+        case  DICTIONARY + PROJECT + _READ + _SUCCESS:
+            if (Array.isArray(payload) && !payload.length) return state;
+
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: cloneProject(state.selectedProject),
+                items: payload.map(p => cloneProject(p))
+            });
+
+            return nextState;
+
+            break;
+
+        case  DICTIONARY + PROJECT + _READ + _ERROR:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: state.selectedProject._id ? cloneProject(state.selectedProject) : cloneProject(payload),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            if (Array.isArray(payload)) {
+                payload.forEach(data => { if (data.field && data.message) nextState.errors[data.field] = data.message; });
+            } else if (payload.field && payload.message) {
+                nextState.errors = { [payload.field]: payload.message }
+            } else if (payload.message) {
+                nextState.error = payload.message;
+            } else {
+                nextState.error = payload;
+            }
+
+            return nextState;
+
+            break;
+
+        // UPADTE
+
+        case  DICTIONARY + PROJECT + _UPDATE:
+            return Object.assign({}, state, {
+                isLoading: true,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: cloneProject(state.selectedProject),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            break;
+
+        case  DICTIONARY + PROJECT + _UPDATE + _SUCCESS:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: {
+                    isOpen: false,
+                    title: '',
+                    files: []
+                },
+                selectedProject: state.selectedProject._id ? state.selectedProject._id === payload._id ? cloneProject(payload) : cloneProject(state.selectedProject) : {
+                    _id: null,
+                    title: null,
+                    img: null,
+                    devices: []
+                },
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => {
+                    if (payload._id === p._id) {
+                        return cloneProject(payload);
+                    } else {
+                        return cloneProject(p);
+                    }
+                }) : []
+            });
+
+            return nextState;
+
+            break;
+
+        case  DICTIONARY + PROJECT + _UPDATE + _ERROR:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: state.selectedProject._id ? cloneProject(state.selectedProject) : cloneProject(payload),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            if (Array.isArray(payload)) {
+                payload.forEach(data => { if (data.field && data.message) nextState.errors[data.field] = data.message; });
+            } else if (payload.field && payload.message) {
+                nextState.errors = { [payload.field]: payload.message }
+            } else if (payload.message) {
+                nextState.error = payload.message;
+            } else {
+                nextState.error = payload;
+            }
+
+            return nextState;
+
+            break;
+
+        // DELETE
+        case  DICTIONARY + PROJECT + _DELETE:
+            return Object.assign({}, state, {
+                isLoading: true,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: cloneProject(state.selectedProject),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            break;
+
+        case  DICTIONARY + PROJECT + _DELETE + _SUCCESS:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: state.selectedProject._id === payload._id ? {
+                    _id: null,
+                    title: null,
+                    img: null,
+                    devices: []
+                } : cloneProject(state.selectedProject),
+                items: state.items.map(p => cloneProject(p)).filter(p => p._id !== payload._id)
+            });
+
+            return nextState;
+
+            break;
+
+        case  DICTIONARY + PROJECT + _DELETE + _ERROR:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                selectedProject: state.selectedProject._id ? cloneProject(state.selectedProject) : cloneProject(payload),
+                items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+            });
+
+            if (Array.isArray(payload)) {
+                payload.forEach(data => { if (data.field && data.message) nextState.errors[data.field] = data.message; });
+            } else if (payload.field && payload.message) {
+                nextState.errors = { [payload.field]: payload.message }
+            } else if (payload.message) {
+                nextState.error = payload.message;
+            } else {
+                nextState.error = payload;
+            }
+
+            return nextState;
+
+            break;
+
+
+
+        ///
+
+        case DICTIONARY + PROJECT + _SELECT:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                items: state.items.map(p => cloneProject(p))
+            });
+
+            for (let i = 0, l = nextState.items.length; i < l; i++) {
+                if (nextState.items[i]._id === data.pid) {
+                    nextState.selectedProject = cloneProject(nextState.items[i]);
+                    break;
+                }
+            }
+
+            return nextState;
+
+            break;
+
+        case PROJECT + DEVICE + SENSOR + _UPDATE:
+            nextState = Object.assign({}, state, {
+                isLoading: false,
+                error: false,
+                errors: {},
+                newProject: Object.assign({}, state.newProject),
+                items: state.items.map(p => cloneProject(p))
+            });
+
+            /*for (let i = 0, l = nextState.items.length; i < l; i++) {
+                if (nextState.items[i]._id === data.pid) {
+                    nextState.selectedProject = cloneProject(nextState.items[i]);
+                    break;
+                }
+            }*/
+
+            for (let i = 0, l = nextState.selectedProject.devices.length; i < l; i++) {
+                for (let ii = 0, ll = nextState.selectedProject.devices[i].sensors.length; ii < ll; ii++) {
+                    if (nextState.selectedProject.devices[i].sensors[ii]._id === data._id) {
+                        nextState.selectedProject.devices[i].sensors[ii].editMode = true;
+                    } else {
+                        delete nextState.selectedProject.devices[i].sensors[ii].editMode
+                    }
+                }
+            }
+
+            return nextState;
+
+            break;
+
+
+        ////////////////
+        case MODAL + _SHOW:
+            if ('ADD_PROJECT' === data.modalType) {
+                return Object.assign({}, state, {
+                    isLoading: false,
+                    error: false,
+                    errors: {},
+                    newProject: {
+                        isOpen: true,
+                        title: '',
+                        files: []
+                    },
+                    selectedProject: state.selectedProject._id ? cloneProject(state.selectedProject) : {
+                        _id: null,
+                        title: null,
+                        img: null,
+                        devices: []
+                    },
+                    items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+                });
             }
 
             return state;
@@ -332,23 +466,36 @@ export default function (state = defaultState, action) {
             break;
 
         case MODAL + _HIDE:
-            if (state.device.files[0]) window.URL.revokeObjectURL(state.device.files[0].preview);
+            if ('ADD_PROJECT' === data.modalType) {
+                if (state.newProject.files[0]) window.URL.revokeObjectURL(state.newProject.files[0].preview);
 
-            if ('ADD_DEVICE' === data.modalType) return Object.assign({}, state, {
-                device: state.device._id ? state.device : { files: [] },
-                dialog: { isOpen: false },
-                error: false,
-                errors: {}
-            });
+                return Object.assign({}, state, {
+                    isLoading: false,
+                    error: false,
+                    errors: {},
+                    newProject: {
+                        isOpen: false,
+                        title: '',
+                        files: []
+                    },
+                    selectedProject: state.selectedProject._id ? cloneProject(state.selectedProject) : {
+                        _id: null,
+                        title: null,
+                        img: null,
+                        devices: []
+                    },
+                    items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+                });
+            }
 
             return state;
 
             break;
 
         case INPUT_CHANGE:
-            if (rest.componentName && ('addDevice' === rest.componentName)) {
+            if (rest.componentName && ('addProject' === rest.componentName)) {
                 nextState = Object.assign({}, state);
-                for (let k in data) nextState.device[k] = data[k];
+                for (let k in data) nextState.newProject[k] = data[k];
 
                 return nextState;
             }

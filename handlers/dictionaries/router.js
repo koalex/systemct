@@ -15,6 +15,7 @@ const Api           = new Router({ prefix: '/api/dictionaries' });
 const ugo           = require('./controllers/ugo');
 const sensor        = require('./controllers/sensor');
 const device        = require('./controllers/device');
+const projects      = require('./controllers/projects');
 
 
 Api.post('/ugo',        ugo.create);
@@ -40,6 +41,14 @@ Api.post('/devices/import',  device.imports);
 Api.get('/devices/:id',     device.read);
 Api.put('/devices/:id',     device.update);
 Api.del('/devices/:id',     device.delete);
+
+Api.post('/projects',        projects.create);
+Api.get('/projects',         projects.read);
+Api.get('/projects/export',  projects.export);
+Api.post('/projects/import',  projects.imports);
+Api.get('/projects/:id',     projects.read);
+Api.put('/projects/:id',     projects.update);
+Api.del('/projects/:id',     projects.delete);
 
 
 router.use(Api.routes());

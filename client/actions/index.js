@@ -1,6 +1,6 @@
 'use strict';
 
-import { AUTH, _IMPORT, _EXPORT, _CHECK, SIGNOUT, MODAL, _SHOW, _HIDE, _CHANGE, SIGNIN, USERS, DICTIONARY, UGO, SENSOR, DEVICE, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
+import { AUTH, _IMPORT, _EXPORT, _CHECK, SIGNOUT, MODAL, _SHOW, _HIDE, _CHANGE, _SELECT, SIGNIN, USERS, DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
 
 export function dispatch (data) {
     const { type, ...rest } = data;
@@ -175,6 +175,23 @@ export function dictionaryCreate (data) {
             };
 
             break;
+
+        case 'project':
+            return {
+                type: DICTIONARY + PROJECT + _CREATE,
+                data: data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/projects',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    }
+                },
+
+            };
+
+            break;
     }
 
 }
@@ -210,6 +227,18 @@ export function dictionaryRead (dictionary) {
                 type: DICTIONARY + DEVICE + _READ,
                 CALL_API: {
                     endpoint: '/api/dictionaries/devices',
+                    method: 'GET'
+                },
+
+            };
+
+            break;
+
+        case 'project':
+            return {
+                type: DICTIONARY + PROJECT + _READ,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/projects',
                     method: 'GET'
                 },
 
@@ -275,6 +304,30 @@ export function dictionaryUpdate (data) {
 
             break;
 
+        case 'project':
+            return {
+                type: DICTIONARY + PROJECT + _UPDATE,
+                data: data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/projects/' + data.projectId,
+                    headers: {
+                        'Content-Type': data.body && Array.isArray(data.body.files) && data.body.files.length  ? 'multipart/form-data' : 'application/json',
+                    },
+                    method: 'PUT'
+                },
+
+            };
+
+            break;
+
+    }
+}
+
+export function projectDeviceSensorEdit (sensor) {
+    return {
+        type: PROJECT + DEVICE + SENSOR + _UPDATE,
+        data: sensor
     }
 }
 
@@ -322,7 +375,28 @@ export function dictionaryDelete (data) {
 
             break;
 
+        case 'project':
+            return {
+                type: DICTIONARY + PROJECT + _DELETE,
+                data: { projectId: data.projectId },
+                skipSuccess: true,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/projects/' + data.projectId,
+                    method: 'DELETE'
+                },
+
+            };
+
+            break;
+
     }
+}
+
+export function dictionaryProjectSelect (pid) {
+    return {
+        type: DICTIONARY + PROJECT + _SELECT,
+        data: { pid },
+    };
 }
 
 export function dictionaryExport (dictionary, filename) {
@@ -359,6 +433,19 @@ export function dictionaryExport (dictionary, filename) {
                 filename: filename,
                 CALL_API: {
                     endpoint: '/api/dictionaries/devices/export',
+                    method: 'GET'
+                },
+
+            };
+
+            break;
+
+        case 'projects':
+            return {
+                type: DICTIONARY + PROJECT + _EXPORT,
+                filename: filename,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/projects/export',
                     method: 'GET'
                 },
 
@@ -411,6 +498,23 @@ export function dictionaryImport (data) {
                 skipSuccess: data.skipSuccess,
                 CALL_API: {
                     endpoint: '/api/dictionaries/devices/import',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    method: 'POST'
+                },
+
+            };
+
+            break;
+
+        case 'projects':
+            return {
+                type: DICTIONARY + PROJECT + _IMPORT,
+                data,
+                skipSuccess: data.skipSuccess,
+                CALL_API: {
+                    endpoint: '/api/dictionaries/projects/import',
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },

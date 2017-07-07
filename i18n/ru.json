@@ -51,11 +51,12 @@
 	"WRONG_ROLE": "неверно указана роль",
 	"VAL_NOT_UNIQUE": "уже занято",
 	"SENSOR_TITLE_REQUIRED": "название датчика не заполнено",
+	"SENSOR_TYPE_REQUIRED": "не указан тип датчика",
 	"UGO_TITLE_REQUIRED": "название УГО не запонено",
 	"DEVICE_TITLE_REQUIRED": "название устройства не заполнено",
 	"REGISTER_PARAM_REQUIRED": "параметр регистра не заполнен",
 	"PROJECT_TITLE_REQUIRED": "не указано название проекта",
-	"CANNOT IDENT_DEVICE": "неверный ObjectID устройства",
+	"CANNOT_IDENT_DEVICE": "неверный ObjectID устройства",
 	"Unexpected token )": "Unexpected token )",
 	"Socket.of is not a function": "Socket.of is not a function",
 	"userUpdated is not defined": "userUpdated is not defined",
@@ -91,5 +92,10 @@
 	"Sensor is not defined": "Sensor is not defined",
 	"Cast to Array failed for value \"[object Object]\" at path \"sensors\"": "Cast to Array failed for value \"[object Object]\" at path \"sensors\"",
 	"Cast to ObjectID failed for value \"4d943a4b-b958-404d-a325-1fe8ed49177c\" at path \"_id\"": "Cast to ObjectID failed for value \"4d943a4b-b958-404d-a325-1fe8ed49177c\" at path \"_id\"",
-	"Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Device\"": "Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Device\""
+	"Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Device\"": "Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Device\"",
+	"Identifier 'PROJECT' has already been declared": "Identifier 'PROJECT' has already been declared",
+	"Undefined type `undefined` at `required`\n  Did you try nesting Schemas? You can only nest using refs or arrays.": "Undefined type `undefined` at `required`\n  Did you try nesting Schemas? You can only nest using refs or arrays.",
+	"get `/projects/export`: `middleware` must be a function, not `undefined`": "get `/projects/export`: `middleware` must be a function, not `undefined`",
+	"d is not defined": "d is not defined",
+	"`{VALUE}` is not a valid enum value for path `{PATH}`.": "`{VALUE}` is not a valid enum value for path `{PATH}`."
 }

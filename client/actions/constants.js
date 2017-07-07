@@ -12,6 +12,7 @@ const _HIDE           = '_HIDE';
 const _CLEAR          = '_CLEAR';
 const _DROP           = '_DROP';
 const _CHANGE         = '_CHANGE';
+const _SELECT         = '_SELECT';
 const _IMPORT         = '_IMPORT';
 const _EXPORT         = '_EXPORT';
 
@@ -42,6 +43,7 @@ module.exports = {
     _CLEAR,
     _DROP,
     _CHANGE,
+    _SELECT,
     _IMPORT,
     _EXPORT,
 

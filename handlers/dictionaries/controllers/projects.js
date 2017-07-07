@@ -22,7 +22,7 @@ const AccessControl = require('accesscontrol');
 const abac          = new AccessControl(/*grants*/);
 const Socket        = require('../../../libs/socket');
 
-const { DICTIONARY, UGO, SENSOR, PROJECT, PROJECT, MODAL, _CREATE, _READ, _UPDATE, _DELETE, _IMPORT, _EXPORT, _SUCCESS, _ERROR, _HIDE } = require(config.actionsRoot);
+const { DICTIONARY, UGO, SENSOR, PROJECT, MODAL, _CREATE, _READ, _UPDATE, _DELETE, _IMPORT, _EXPORT, _SUCCESS, _ERROR, _HIDE } = require(config.actionsRoot);
 
 abac.grant('superuser')
     .createAny('project')
@@ -39,8 +39,119 @@ abac.grant('admin')
 abac.grant('manager')
     .readAny('project');
 
+exports.export = async ctx => {
+    const permission = abac.can(ctx.state.user.role).readAny('project');
 
-const modbusConnect = params => {
+    if (permission.granted) {
+        let projects = await Project.find().lean().exec();
+
+        if (!projects.length) {
+            ctx.throw(404, 'DICTIONARY_EMPTY');
+            return;
+        }
+
+        let archive = archiver('tar', { zlib: { level: 9 } });
+
+        archive.on('error', err => { ctx.throw(500, err); });
+
+        // archive.pipe(ReadableStream...);
+
+        archive.append(JSON.stringify(projects), { name: 'projects.json' });
+
+        if (projects.length) {
+            projects.forEach(projectItem => {
+                if (Array.isArray(projectItem.devices) && projectItem.devices.length) {
+                    projectItem.devices.forEach(device => {
+                        if (device.img) archive.append(fs.createReadStream( join(config.projectRoot, device.img) ), { name: basename(device.img) });
+
+                        if (Array.isArray(device.sensors) && device.sensors.length) {
+                            device.sensors.forEach(sensor => {
+                                if (sensor.img) archive.append(fs.createReadStream( join(config.projectRoot, sensor.img) ), { name: basename(sensor.img) });
+                            });
+                        }
+                    })
+                }
+            })
+        }
+
+        archive.finalize();
+
+        ctx.type = 'application/gzip';
+
+        ctx.body = archive;
+    }
+};
+
+exports.imports = async ctx => {
+    const permission = abac.can(ctx.state.user.role).createAny('project');
+
+    if (!permission.granted) {
+        ctx.throw(403);
+        return;
+    }
+
+    const { files, fields } = await ctx.multipartParser.parse(ctx);
+
+    if (!files || !Array.isArray(files) || !files.length || extname(files[0].filename) !== '.tar') {
+        ctx.throw(400);
+    }
+
+    let projectsDataPath;
+    // TODO: check mime-type && clean extracted if no .json
+    files[0].pipe(tar.extract(config.filesRoot, {
+        mapStream: function (fileStream, header) {
+            if (extname(header.name) === '.json') {
+                projectsDataPath = join(config.filesRoot, header.name);
+            }
+
+            return fileStream;
+        }
+    }));
+
+    let projects = await new Promise((resolve, reject) => {
+        files[0].on('end', () => {
+            setTimeout(() => {
+                if (!projectsDataPath) {
+                    resolve(null);
+                } else {
+                    let projects = require(projectsDataPath);
+                    resolve(projects);
+                }
+            }, 1000)
+        })
+    });
+
+    if (!projects) {
+        ctx.throw(400);
+    } else {
+        await fs.unlink(projectsDataPath);
+
+        for (let i = 0, l = projects.length; i < l; i++) {
+            delete projects[i]._id;
+            delete projects[i].id;
+
+            let newProject                  = new Project(projects[i]);
+                newProject.last_updated_by  = ctx.state.user._id;
+            try {
+                await newProject.save();
+            } catch (err) {
+                ctx.throw(400);
+                return;
+            }
+        }
+
+        config.roles.filter(role => role !== 'manager').forEach(role => {
+            Socket.emitter.of('/api').to(role).emit(DICTIONARY + PROJECT + _IMPORT + _SUCCESS);
+        });
+
+        ctx.type = 'json';
+
+        ctx.status = 204;
+    }
+};
+
+
+/*const modbusConnect = params => {
     return new Promise((resolve, reject) => {
         let client = modbus.client.tcp.complete({
             'host'              : params.ip,
@@ -57,7 +168,7 @@ const modbusConnect = params => {
         client.on('connect', () => { resolve(client); });
         client.on('connect', err => { reject(err); });
     });
-};
+};*/
 
 
 exports.create = async ctx => {
@@ -67,7 +178,7 @@ exports.create = async ctx => {
 
     if (permission.granted) {
 
-        let newProject                  = new Device(projectCandidate);
+        let newProject                  = new Project(projectCandidate);
             newProject.last_updated_by  = ctx.state.user._id;
 
         if (ctx.request.body.files) newProject.img = ctx.request.body.files[0];
@@ -76,7 +187,7 @@ exports.create = async ctx => {
 
         newProject = newProject.toJSON();
 
-        config.roles.filter(role => role !== 'manager').forEach(role => {
+        config.roles.forEach(role => {
             Socket.emitter.of('/api').to(role).emit(DICTIONARY + PROJECT + _CREATE + _SUCCESS, newProject);
         });
 
@@ -126,7 +237,6 @@ exports.update = async ctx => {
             if (!project[k]) project[k] = projectCandidate[k];
         }
 
-        if (Array.isArray(ctx.request.body.files) && ctx.request.body.files[0]) project.img = ctx.request.body.files[0];
 
         await project.save();
 
@@ -135,10 +245,6 @@ exports.update = async ctx => {
         config.roles.filter(role => role !== 'manager').forEach(role => {
             Socket.emitter.of('/api').to(role).emit(DICTIONARY + PROJECT + _UPDATE + _SUCCESS, project.toJSON());
         });
-        let userSocketSessionIds = await Socket.session_ids(ctx.state.token);
-            userSocketSessionIds.forEach(s_id => {
-                Socket.emitter.of('/api').to(s_id).emit(PROJECT + MODAL + _HIDE);
-            });
 
         ctx.type = 'json';
 
@@ -157,11 +263,6 @@ exports.delete = async ctx => {
         config.roles.filter(role => role !== 'manager').forEach(role => {
             Socket.emitter.of('/api').to(role).emit(DICTIONARY + PROJECT + _DELETE + _SUCCESS, { _id: ctx.params.id });
         });
-
-        let userSocketSessionIds = await Socket.session_ids(ctx.state.token);
-            userSocketSessionIds.forEach(s_id => {
-                Socket.emitter.of('/api').to(s_id).emit(PROJECT + MODAL + _HIDE);
-            });
 
         ctx.status = 204;
     } else {

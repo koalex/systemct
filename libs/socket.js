@@ -25,6 +25,8 @@ const BlackList      = require('../handlers/auth/models/blacklist');
 
 const socketPrefix   = 'S_';
 
+const IEEE754        = require('../libs/IEEE754');
+
 // https://msdn.microsoft.com/en-us/library/ms533052(v=vs.85).aspx
 let locales = fs.readdirSync(join(__dirname, '../i18n')).map(localeFileName => basename(localeFileName, '.json'));
 acceptLanguage.languages(locales);
@@ -35,6 +37,40 @@ const i18n           = new (require('i18n-2'))({
     defaultLocale: config.defaultLocale,
     extension: '.json'
 });
+
+
+const url = require('url');
+/*let socketRoutes = [];
+
+let stats = fs.readdirSync(`${config.projectRoot}/handlers`);
+    stats.forEach(stat => {
+        if (fs.lstatSync(`${config.projectRoot}/handlers/${stat}`).isDirectory()) {
+            let router = require(`${config.projectRoot}/handlers/${stat}/router.js`);
+            if (router.socketTest) {
+                if (Array.isArray(router.socketTest)) {
+                    router.socketTest.forEach(s => {
+                        socketRoutes.push(s);
+                    })
+                } else {
+                    socketRoutes.push(router.socketTest);
+                }
+            }
+        }
+    });
+
+console.log('socketRoutes ===', socketRoutes);*/
+var modbus = require('jsmodbus');
+
+// create a modbus client
+// var client = modbus.client.tcp.complete({
+//     'host'              : '10.211.55.6',
+//     'port'              : 502,
+//     'autoReconnect'     : true,
+//     'reconnectTimeout'  : 1000,
+//     'timeout'           : 5000,
+//     'unitId'            : 1
+// });
+
 
 function tokenFromSocket (socket) {
     let handshakeData = socket.request; // http request
@@ -122,6 +158,139 @@ function Socket (server) {
         socket.join(String(socket.user._id));
         socket.join(socket.user.role); // TODO: on signout leave, on change role leave
         socket.on('changeLocale', locale => { i18n.setLocale(locale); });
+
+        socket.on('READ_HOLDING_REGISTERS', data => {
+
+
+            let connection = url.parse(data.url, true);
+
+            var client = modbus.client.tcp.complete({
+                'host'              : connection.hostname,
+                'port'              : connection.port,
+                'autoReconnect'     : true,
+                'reconnectTimeout'  : 1000,
+                'timeout'           : 5000,
+                'unitId'            : 1
+            });
+
+            let promises = [];
+
+            client.connect();
+
+            client.on('error', err => {
+                data.registers.forEach(r => {
+                    Socket.emitter.of('/api').to(socket.user.role).emit('READ_HOLDING_REGISTERS_ERROR', {
+                        error: err,
+                        deviceId: data.deviceId,
+                        sensorId: data.sensorId,
+                        register: r
+                    })
+                });
+            });
+
+            // word - 2 байта (signed int - 0-32767-65556 *** и unsigned short - 0-65556);
+            // если число до 32767 то доп обработок не нужно, а если больше то смотреть доп код
+
+            // если UINT преобразования не требуются это всегда число до 65535,
+            // если INT то в диапазоне от 0-32767 включительно то преобразования не требуются, иначе
+            // от полученного значения отнимаем 65536 и получим отрицательное
+
+            // float - 4
+            // double  - 8
+            //
+
+            client.on('connect', () => {
+                data.registers.forEach(r => {
+                    promises.push(
+
+                        client.readHoldingRegisters(r, IEEE754[data.dataType].bits / 16)
+                            .then(resp => {
+                                Socket.emitter.of('/api').to(socket.user.role).emit('READ_HOLDING_REGISTERS_SUCCESS', {
+                                    data: IEEE754[data.dataType].parse(resp),
+                                    register: r,
+                                    deviceId: data.deviceId,
+                                    sensorId: data.sensorId
+                                });
+
+                            })
+                            .catch(err => {
+                                Socket.emitter.of('/api').to(socket.user.role).emit('READ_HOLDING_REGISTERS_ERROR', {
+                                    error: err,
+                                    deviceId: data.deviceId,
+                                    sensorId: data.sensorId,
+                                    register: r
+                                })
+                            })
+                    )
+                });
+
+                Promise.all(promises).then(() => { console.log('close'); client.close(); })
+            });
+
+        });
+
+        socket.on('WRITE_HOLDING_REGISTERS', data => {
+            let connection = url.parse(data.url, true);
+
+            var client = modbus.client.tcp.complete({
+                'host'              : connection.hostname,
+                'port'              : connection.port,
+                'autoReconnect'     : true,
+                'reconnectTimeout'  : 1000,
+                'timeout'           : 5000,
+                'unitId'            : 1
+            });
+
+            let promises = [];
+
+            client.connect();
+
+            client.on('error', err => {
+                data.registers.forEach(r => {
+                    Socket.emitter.of('/api').to(socket.user.role).emit('WRITE_HOLDING_REGISTERS_ERROR', {
+                        error: err,
+                        deviceId: data.deviceId,
+                        sensorId: data.sensorId,
+                        register: r
+                    })
+                });
+            });
+
+            client.on('connect', () => {
+                console.log('write', data)
+                console.log('writeBytes', IEEE754[data.dataType].toBytesArray(data.v))
+
+                client.writeMultipleRegisters(data.r, Buffer.from(IEEE754[data.dataType].toBytesArray(data.v))).then(resp => {
+                    console.log('2', resp)
+                    return client.readHoldingRegisters(data.r, IEEE754[data.dataType].bits / 16)
+                        .then(resp => {
+                            Socket.emitter.of('/api').to(socket.user.role).emit('READ_HOLDING_REGISTERS_SUCCESS', {
+                                data: IEEE754[data.dataType].parse(resp),
+                                register: data.r,
+                                deviceId: data.deviceId,
+                                sensorId: data.sensorId
+                            });
+                        })
+                        .catch(err => {
+                            Socket.emitter.of('/api').to(socket.user.role).emit('READ_HOLDING_REGISTERS_ERROR', {
+                                error: err,
+                                deviceId: data.deviceId,
+                                sensorId: data.sensorId,
+                                register: r
+                            })
+                        })
+                }).then(() => {
+                    console.log('4')
+                    Socket.emitter.of('/api').to(socket.user.role).emit('WRITE_HOLDING_REGISTERS_SUCCESS', {});
+                }).catch(err => {
+                    console.log('5')
+                    Socket.emitter.of('/api').to(socket.user.role).emit('WRITE_HOLDING_REGISTERS_ERROR', {
+                        error: err
+                    });
+                })
+            });
+
+        });
 
         socket.on('disconnect', () => {
 

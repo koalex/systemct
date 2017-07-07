@@ -13,6 +13,13 @@ const history  = require('mongoose-version');
 
 const sensorSchema = new mongoose.Schema({
         title: { type: String, trim: true, required: 'SENSOR_TITLE_REQUIRED' },
+        type: {
+            type: String,
+            trim: true,
+            required: 'SENSOR_TYPE_REQUIRED',
+            lowercase: true,
+            enum: ['числовой', 'дискретный']
+        },
         designation: { type: String, trim: true },
         img: { type: String },
 
