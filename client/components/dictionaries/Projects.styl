@@ -52,5 +52,23 @@
   //  overflow-y auto !important
   //  overflow-x hidden !important
 
-:local(.ip-address-parts)
-  display flex
+:local(.ip-address-dot-delim)
+  font-size 48px
+  line-height 0
+  vertical-align middle
+
+:local(.ip-address-port-delim)
+  font-size 48px
+  line-height 0
+  vertical-align middle
+
+:local(.ip-address-part)
+  padding-left 8px
+  width 48px !important
+  height 48px !important
+  border-width 2px
+  border-style solid
+  box-sizing border-box
+
+:local(.ip-address-port)
+  width 68px !important

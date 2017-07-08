@@ -17,6 +17,7 @@ const projectSchema = new mongoose.Schema({
         devices: [{
             _id: { type: String, required: 'CANNOT_IDENT_DEVICE' },
             ip: { type: String, trim: true },
+            port: { type: Number, min: 1, max: 65535 },
             title: { type: String, trim: true, required: 'DEVICE_TITLE_REQUIRED' },
             img: { type: String },
             sensors: [{

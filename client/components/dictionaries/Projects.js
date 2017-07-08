@@ -59,6 +59,8 @@ import { projectDeviceSensorEdit, dictionaryProjectSelect, deviceSensorDelete, d
 import { DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, MODAL, _DROP, _CREATE, _UPDATE, _DELETE, _IMPORT, _SUCCESS, _ERROR, _CLEAR, _HIDE } from '../../actions/constants';
 import IEEE754 from '../../../libs/IEEE754_client.js';
 
+import IpPort from '../IpPort';
+
 @connect(
     state => {
         const { ugo, sensors, devices, projects, modal, common } = state;
@@ -240,7 +242,7 @@ export default class _Device extends Component {
 
         if (!registers) return;
         this.props.socket.emit('READ_HOLDING_REGISTERS', {
-            url: 'http://' + this.state.selectedDevice.ip,
+            url: 'http://' + this.state.selectedDevice.ip + ':' + this.state.selectedDevice.port,
             deviceId: selectedDevice._id,
             sensorId: sensorId,
             dataType,
@@ -336,13 +338,14 @@ export default class _Device extends Component {
         this.projectUpdate(projectUpdated);
     };
 
-    deviceIpSave = () => {
+    deviceIpSave = dataObj => {
         // deviceIP
         let projectUpdated = cloneProject(this.props.projects.selectedProject);
 
         projectUpdated.devices.forEach(d => {
             if (d._id === this.state.selectedDevice._id) {
-                d.ip = this.refs.deviceIP.input.value;
+                d.ip    = dataObj.ip;
+                d.port  = dataObj.port;
             }
         });
 
@@ -889,83 +892,21 @@ export default class _Device extends Component {
                 </TableRowColumn>
             </TableRow> }) : null ;
         let dictionaryDropzoneRef;
+
         return (
             <div className={ styles['projects-container'] }>
-                <Dialog
-                    actions={ [
-                        <FlatButton
-                            label="Сохранить"
-                            primary={ true }
-                            keyboardFocused={ false }
-                            disabled={ reducer.isLoading }
-                            onTouchTap={ this.deviceIpSave }
-                        />,
-                        <FlatButton
-                            label="Закрыть"
-                            primary={ true }
-                            keyboardFocused={ false }
-                            disabled={ reducer.isLoading }
-                            onTouchTap={ () => {
-                                this.setState(Object.assign({}, this.state, {
-                                    ipDialogIsOpen: false
-                                }))
-                            } }
-                        />
-                    ] }
-                    title={ 'IP адрес устройства' }
-                    modal={ true }
-                    contentStyle={{ width: '304px' }}
-                    autoScrollBodyContent={ false }
+                <IpPort
+                    disabled={ reducer.isLoading }
+                    ip={ this.state.selectedDevice ? this.state.selectedDevice.ip : null }
+                    port={ this.state.selectedDevice ? this.state.selectedDevice.port : null }
                     open={ this.state.ipDialogIsOpen }
-                >
-                    <div style={{ height: '50px' }}>
-                        <TextField
-                            autoFocus={ false }
-                            onKeyPress={ ev => {
-                                if (ev.key === 'Enter') {
-                                    ev.preventDefault();
-                                    if (this.state.registryMode === 'add') {
-                                        if (!this.state.r || !this.state.r.trim()) {
-                                            this.setState(Object.assign({}, this.state, {
-                                                registerError: 'не заполнено'
-                                            }));
-                                            return;
-                                        }
-
-                                        if (isNaN(this.state.r)) {
-                                            this.setState(Object.assign({}, this.state, {
-                                                registerError: 'некорректный регистр'
-                                            }));
-                                            return;
-                                        }
-
-                                        if (Array.isArray(this.state.s.registers)) {
-                                            if (this.state.s.registers.some(r => Number(r) === Number(this.state.r))) {
-                                                this.setState(Object.assign({}, this.state, {
-                                                    registerError: 'такой регистр уже есть'
-                                                }));
-                                                return;
-                                            }
-                                            this.state.s.registers.push(this.state.registerValue);
-                                        }
-
-                                        this.addRegistryToSensor()
-                                    } else {
-                                        // write to register
-                                    }
-                                }
-                            }}
-                            name="deviceIP"
-                            ref="deviceIP"
-                            defaultValue={ this.state.selectedDevice ? this.state.selectedDevice.ip : null }
-                            onChange={ (ev) => {
-
-                            } }
-                            errorText={ this.state.ipError }
-                            hintText={ '192.168.0.1:5000' }
-                        />
-                    </div>
-                </Dialog>
+                    close={ () => {
+                        this.setState(Object.assign({}, this.state, {
+                            ipDialogIsOpen: false
+                        }))
+                    } }
+                    submit={ this.deviceIpSave }
+                />
 
                 <Dialog
                     actions={ [
