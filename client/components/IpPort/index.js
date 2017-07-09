@@ -127,9 +127,9 @@ export default class IpPort extends Component {
         if (!fail) {
             let data = { ip: '' };
 
-            for (let i = 1; i <= 4; i++) { data.ip += this.refs['ipPart' + i].input.value + (i == 4 ? '' : '.'); }
+            for (let i = 1; i <= 4; i++) { data.ip += this.refs['ipPart' + i].input.value.trim() + (i == 4 ? '' : '.'); }
 
-            data.port = Number(this.refs['ipPort'].input.value);
+            data.port = Number(this.refs['ipPort'].input.value.trim());
 
             this.props.submit(data);
         }
@@ -160,6 +160,7 @@ export default class IpPort extends Component {
                 contentStyle={{ width: '400px' }}
                 autoScrollBodyContent={ false }
                 open={ this.props.open }
+                onRequestClose={ () => { this.setState({ errors: {} }); } }
             >
                 <form className={ styles['ip-address-parts'] }>
                     <TextField

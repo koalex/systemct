@@ -54,12 +54,15 @@ import PlusCircleIcon                 from 'material-ui/svg-icons/content/add-ci
 import ImageIcon                 from 'material-ui/svg-icons/image/image';
 import CircularProgress                                     from 'material-ui/CircularProgress';
 
+import IEEE754          from '../../../libs/IEEE754_client.js';
+import IpPort           from '../IpPort';
+import RegisterAdd      from '../RegisterAdd';
+import RegisterWrite    from '../RegisterWrite';
+
 import { connect }              from 'react-redux';
 import { projectDeviceSensorEdit, dictionaryProjectSelect, deviceSensorDelete, deviceSensorEdit, addDeviceSensor, setCurrentDevice, dictionaryCreate, dictionaryRead, dictionaryUpdate, dictionaryDelete, dictionaryExport, dictionaryImport, modalShow, modalHide, inputChange, dispatch } from '../../actions';
 import { DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, MODAL, _DROP, _CREATE, _UPDATE, _DELETE, _IMPORT, _SUCCESS, _ERROR, _CLEAR, _HIDE } from '../../actions/constants';
-import IEEE754 from '../../../libs/IEEE754_client.js';
 
-import IpPort from '../IpPort';
 
 @connect(
     state => {
@@ -100,13 +103,13 @@ export default class _Device extends Component {
 
     socketListensers = {
         'READ_HOLDING_REGISTERS_SUCCESS': data => {
+            console.log('DATA ===', data)
             this.props.dispatch({
                 type: 'READ_HOLDING_REGISTERS_SUCCESS',
                 payload: data
             });
         },
         'READ_HOLDING_REGISTERS_ERROR': data => {
-            window.err = data.error;
             this.props.dispatch({
                 type: 'READ_HOLDING_REGISTERS_ERROR',
                 payload: data
@@ -490,14 +493,14 @@ export default class _Device extends Component {
         }))
     };
 
-    addRegistryToSensor = () => {
+    addRegistryToSensor = rv => {
         let projectClone = cloneProject(this.props.projects.selectedProject);
         // this.state.selectedDevice
         projectClone.devices.forEach(device => {
             if (this.state.selectedDevice._id === device._id) {
                 device.sensors.forEach(sensor => {
                     if (this.state.s._id === sensor._id) {
-                        sensor.registers.push(this.refs.registryTitle.input.value)
+                        sensor.registers.push(rv || this.refs.registryTitle.input.value)
                     }
                 });
             }
@@ -506,9 +509,9 @@ export default class _Device extends Component {
         this.projectUpdate(projectClone);
     };
 
-    writeSingleRegister = () => {
+    writeSingleRegister = rv => {
         const self        = this;
-        let registerValue = this.refs.registryTitle.input.value;
+        let registerValue = rv || this.refs.registryTitle.input.value;
 
         let selectedDevice, bytes, dataType;
 
@@ -742,42 +745,6 @@ export default class _Device extends Component {
                         { Object.keys(IEEE754).map(v => <MenuItem key={ v } value={ v } primaryText={ v } />) }
                     </SelectField>
                 </TableRowColumn>
-                {/*7*/}
-                <TableRowColumn style={{ width: '60px' }}>
-                    <SelectField
-                        disabled={ !s.editMode }
-                        style={{ width: '60px', verticalAlign: 'bottom' }}
-                        iconStyle={{ opacity: s.editMode ? 1 : 0, paddingRight: '0px', fill: '#000', textAlign: 'right' }}
-                        underlineStyle={{ opacity: s.editMode ? 1 : 0 }}
-                        name="sensorBytes"
-                        ref={ s._id + 'sensorBytes' }
-                        defaultValue={ s.bytes }
-                        value={ this.state[s._id + 'sensorBytes'] || s.bytes }
-                        onChange={ (event, index, value) => {
-                            this.setState(Object.assign({}, this.state, {
-                                [s._id + 'sensorBytes']: value
-                            }))
-                        } }
-                    >
-                        <MenuItem value={ 0 } primaryText={ null } />
-                        <MenuItem value={ 1 } primaryText="1" />
-                        <MenuItem value={ 2 } primaryText="2" />
-                        <MenuItem value={ 3 } primaryText="3" />
-                        <MenuItem value={ 4 } primaryText="4" />
-                        <MenuItem value={ 5 } primaryText="5" />
-                        <MenuItem value={ 6 } primaryText="6" />
-                        <MenuItem value={ 7 } primaryText="7" />
-                        <MenuItem value={ 8 } primaryText="8" />
-                        <MenuItem value={ 9 } primaryText="9" />
-                        <MenuItem value={ 10 } primaryText="10" />
-                        <MenuItem value={ 11 } primaryText="11" />
-                        <MenuItem value={ 12 } primaryText="12" />
-                        <MenuItem value={ 13 } primaryText="13" />
-                        <MenuItem value={ 14 } primaryText="14" />
-                        <MenuItem value={ 15 } primaryText="15" />
-                        <MenuItem value={ 16 } primaryText="16" />
-                    </SelectField>
-                </TableRowColumn>
                 {/*8*/}
                 <TableRowColumn style={{ width: '60px' }}>
                     <SelectField
@@ -867,7 +834,12 @@ export default class _Device extends Component {
                                                     </span>
                                                 </Chip>
                                                 <div></div>
-                                                { s.registersValues && s.registersValues[r] != undefined && s.registersValues[r] != null ? s.registersValues[r] == 'ошибка' ? <span style={{ color: 'red' }}>{ s.registersValues[r] }</span> : Number(s.registersValues[r].toFixed(2)) : null }
+                                                { s.registersValues && s.registersValues[r] != undefined && s.registersValues[r] != null ?
+                                                    (s.registersValues[r] == 'ошибка' || s.registersValues[r] == '> 9007199254740991') ?
+                                                        <span style={{ color: 'red' }}>{ s.registersValues[r] }</span>
+                                                        : Number(s.registersValues[r].toFixed(2))
+                                                    : null
+                                                }
 
                                             </TableRowColumn>
                                         </TableRow>
@@ -907,131 +879,45 @@ export default class _Device extends Component {
                     } }
                     submit={ this.deviceIpSave }
                 />
+                <RegisterAdd
+                    disabled={ reducer.isLoading }
+                    registers={ [] }
+                    open={ this.state.registerDialogIsOpen && this.state.registryMode === 'add' }
+                    close={ () => {
+                        this.setState(Object.assign({}, this.state, {
+                            registerError: null,
+                            currentSensor: null,
+                            registerDialogIsOpen: false,
+                            registerValue: null
+                        }));
+                    } }
+                    submit={ this.addRegistryToSensor }
+                />
+                <RegisterWrite
+                    disabled={ reducer.isLoading }
+                    register={ this.state.r }
+                    dataType={ 'Float' }
+                    socket={ this.props.socket }
+                    open={ this.state.registerDialogIsOpen && this.state.registryMode != 'add' }
+                    close={ () => {
+                        this.setState(Object.assign({}, this.state, {
+                            registerError: null,
+                            currentSensor: null,
+                            registerDialogIsOpen: false,
+                            registerValue: null
+                        }));
+                    } }
+                    submit={ this.writeSingleRegister }
+                />
 
-                <Dialog
-                    actions={ [
-                        <FlatButton
-                            label={ this.state.registryMode === 'add' ? 'Создать' : 'Записать значение' }
-                            primary={ true }
-                            keyboardFocused={ false }
-                            onTouchTap={ () => {
-                                if (this.state.registryMode === 'add') {
-                                    if (!this.state.r || !this.state.r.trim()) {
-                                        this.setState(Object.assign({}, this.state, {
-                                            registerError: 'не заполнено'
-                                        }));
-                                        return;
-                                    }
+                {/*Failed prop type: The prop `dataType` is marked as required in `RegisterWrite`, but its value is `undefined`*/}
 
-                                    if (isNaN(this.state.r)) {
-                                        this.setState(Object.assign({}, this.state, {
-                                            registerError: 'некорректный регистр'
-                                        }));
-                                        return;
-                                    }
-
-                                    if (Array.isArray(this.state.s.registers)) {
-                                        if (this.state.s.registers.some(r => Number(r) === Number(this.state.r))) {
-                                            this.setState(Object.assign({}, this.state, {
-                                                registerError: 'такой регистр уже есть'
-                                            }));
-                                            return;
-                                        }
-                                        this.state.s.registers.push(this.state.registerValue);
-                                    }
-
-                                    this.addRegistryToSensor()
-                                } else {
-                                    this.writeSingleRegister()
-                                }
-                            } }
-                            disabled={ reducer.isLoading }
-                        />,
-                        <FlatButton
-                            label="Закрыть"
-                            primary={ true }
-                            keyboardFocused={ false }
-                            onTouchTap={ () => {
-                                this.setState(Object.assign({}, this.state, {
-                                    registerError: null,
-                                    currentSensor: null,
-                                    registerDialogIsOpen: false,
-                                    registerValue: null
-                                }))
-                            } }
-                            disabled={ reducer.isLoading }
-                        />
-                    ] }
-                    title={ this.state.registryMode === 'add' ? 'Добавить регистр' : this.state.r }
-                    modal={ true }
-                    contentStyle={{ width: '304px' }}
-                    autoScrollBodyContent={ false }
-                    open={ this.state.registerDialogIsOpen }
-                >
-                    <div style={{ height: '50px' }}>
-                        <TextField
-                            autoFocus={ true }
-                            onKeyPress={ ev => {
-                                if (ev.key === 'Enter') {
-                                    ev.preventDefault();
-                                    if (this.state.registryMode === 'add') {
-                                        if (!this.state.r || !this.state.r.trim()) {
-                                            this.setState(Object.assign({}, this.state, {
-                                                registerError: 'не заполнено'
-                                            }));
-                                            return;
-                                        }
-
-                                        if (isNaN(this.state.r)) {
-                                            this.setState(Object.assign({}, this.state, {
-                                                registerError: 'некорректный регистр'
-                                            }));
-                                            return;
-                                        }
-
-                                        if (Array.isArray(this.state.s.registers)) {
-                                            if (this.state.s.registers.some(r => Number(r) === Number(this.state.r))) {
-                                                this.setState(Object.assign({}, this.state, {
-                                                    registerError: 'такой регистр уже есть'
-                                                }));
-                                                return;
-                                            }
-                                            this.state.s.registers.push(this.state.registerValue);
-                                        }
-
-                                        this.addRegistryToSensor()
-                                    } else {
-                                        this.writeSingleRegister()
-                                    }
-                                }
-                            }}
-                            name="registryTitle"
-                            ref="registryTitle"
-
-                            onChange={ () => {
-                                if (this.state.registryMode === 'add') {
-                                    this.setState(Object.assign({}, this.state, {
-                                        registerError: null,
-                                        r: this.refs.registryTitle.input.value
-                                    }))
-                                }
-                            } }
-                            errorText={ this.state.registerError }
-                            hintText={ this.state.registryMode === 'add' ? 'например 0x0001' : 'значение' }
-                        ></TextField>
-                    </div>
-                </Dialog>
-                
-                
-                
                 <Dialog actions={ newProjectDialogActions }
                         modal={ true }
                         contentStyle={{ width: '304px' }}
                         autoScrollBodyContent={ false }
                         open={ reducer.newProject.isOpen }
                 >
-
-
                     <div style={{ height: '50px' }}>
                         <TextField
                             autoFocus={ true }
@@ -1139,7 +1025,7 @@ export default class _Device extends Component {
                         </div>
 
                     </h3>
-                    <div style={{ minWidth: 1200, overflow: 'auto' }}>
+                    <div style={{ minWidth: 1100, overflow: 'auto' }}>
                         <div>
                             <Table
                                 className={ styles['projects-project-devices__table'] }
@@ -1183,9 +1069,6 @@ export default class _Device extends Component {
                                         >
                                             Тип данных
                                         </TableHeaderColumn>
-                                        <TableHeaderColumn style={{ width: '60px' }} rowSpan="2" tooltip="Количество байт" >
-                                            Количество<br/>байт
-                                        </TableHeaderColumn>
                                         <TableHeaderColumn style={{ width: '60px' }} rowSpan="2" tooltip="R - чтение; W - запись; RW - чтение и запись" >
                                             Доступ
                                         </TableHeaderColumn>
@@ -1212,18 +1095,6 @@ export default class _Device extends Component {
                                     style={{ verticalAlign: 'middle' }}
                                 >
                                     {tableRows}
-                                    {/*<TableRow >
-                                        <TableRowColumn style={{ paddingLeft: 0, width: '50px' }}>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                        <TableRowColumn>1</TableRowColumn>
-                                    </TableRow>*/}
                                 </TableBody>
                             </Table>
                         </div>

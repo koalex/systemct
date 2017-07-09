@@ -2,8 +2,6 @@
 
 import { DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, _CHANGE, _SELECT, _DROP, _CREATE, _READ,  _UPDATE, _DELETE, MODAL, _SHOW, _HIDE, _SUCCESS, _ERROR, _CLEAR, _EXPORT, _IMPORT, INPUT_CHANGE } from '../actions/constants';
 
-const uuidV4 = require('uuid/v4');
-
 const defaultState = {
     isLoading: false,
     error: false,
@@ -136,7 +134,7 @@ export default function (state = defaultState, action) {
                     d.sensors.forEach(s => {
                         if (s._id == payload.sensorId) {
                             if (!s.registersValues) s.registersValues = {};
-                            s.registersValues[payload.register] = 'ошибка';
+                            s.registersValues[payload.register] = payload.message || 'ошибка'; // payload.message
                         }
                     })
                 }
