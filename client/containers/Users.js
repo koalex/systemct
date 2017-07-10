@@ -120,7 +120,7 @@ export default class Users extends Component {
                               rest.socket       = socket;
 
         return (
-            <div>
+            <div style={{ flexGrow: '1' }}>
                 <FloatingActionButton
                     onTouchTap={() => {
                         modalShow({

@@ -113,7 +113,7 @@ export default class AddEditUsers extends Component {
             />,
             <FlatButton
                 label="Отмена"
-                primary={ true }
+                secondary={ true }
                 keyboardFocused={ true }
                 onTouchTap={ () => { this.props.modalHide({ modalType }) } }
             />
