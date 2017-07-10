@@ -103,7 +103,6 @@ export default class _Device extends Component {
 
     socketListensers = {
         'READ_HOLDING_REGISTERS_SUCCESS': data => {
-            console.log('DATA ===', data)
             this.props.dispatch({
                 type: 'READ_HOLDING_REGISTERS_SUCCESS',
                 payload: data
@@ -327,6 +326,8 @@ export default class _Device extends Component {
         let _sensor = Object.assign(sensor);
         _sensor._id = uuid.v1();
         _sensor.registers = [];
+        if (!_sensor.dataType) _sensor.dataType = 'Float';
+        if (!_sensor.permission) _sensor.permission = 'RW';
 
         projectUpdated.devices.forEach(d => {
             if (d._id === this.state.selectedDevice._id) {
@@ -345,18 +346,22 @@ export default class _Device extends Component {
         // deviceIP
         let projectUpdated = cloneProject(this.props.projects.selectedProject);
 
+        let nextState = Object.assign({}, this.state, {
+            ipDialogIsOpen: false
+        });
+
         projectUpdated.devices.forEach(d => {
             if (d._id === this.state.selectedDevice._id) {
                 d.ip    = dataObj.ip;
                 d.port  = dataObj.port;
+                nextState.selectedDevice.ip   = dataObj.ip;
+                nextState.selectedDevice.port = dataObj.port;
             }
         });
 
         this.projectUpdate(projectUpdated);
 
-        this.setState(Object.assign({}, this.state, {
-            ipDialogIsOpen: false
-        }))
+        this.setState(nextState);
     };
 
     saveSensor = sensor => {
@@ -397,32 +402,6 @@ export default class _Device extends Component {
         }))
     };
 
-    /*submit = device => {
-        let title, files;
-
-        if (! this.props.devices.device._id) {
-            title = this.refs.deviceTitle.input.value;
-        }
-        files = this.props.devices.device.files;
-
-
-        let data = {
-            dictionary: 'device',
-            body: {
-                title
-            },
-            skipSuccess: true
-        };
-
-        if (files && files.length) data.body.files = files;
-        if (this.props.devices.device._id) {
-            data.deviceId = this.props.devices.device._id;
-            data.body = this.props.devices.device;
-            this.props.dictionaryUpdate(data);
-        } else {
-            this.props.dictionaryCreate(data);
-        }
-    };*/
 
     addDeviceToProject = device => {
         let deviceCopy = Object.assign({}, device, {
@@ -500,11 +479,28 @@ export default class _Device extends Component {
             if (this.state.selectedDevice._id === device._id) {
                 device.sensors.forEach(sensor => {
                     if (this.state.s._id === sensor._id) {
-                        sensor.registers.push(rv || this.refs.registryTitle.input.value)
+                        sensor.registers.push(rv || this.refs.registryTitle.input.value);
+                        if (this.state[sensor._id + 'sensorDataType']) sensor.dataType = this.state[sensor._id + 'sensorDataType'];
                     }
                 });
             }
         });
+
+        // dataType
+
+        /*onChange={ (event, index, value) => {
+            this.setState(Object.assign({}, this.state, {
+                [s._id + 'sensorDataType']: value
+            }))
+        } }*/
+
+
+        // RW / R / W
+        /*onChange={ (event, index, value) => {
+            this.setState(Object.assign({}, this.state, {
+                [s._id + 'sensorPermission']: value
+            }))
+        } }*/
 
         this.projectUpdate(projectClone);
     };
@@ -615,7 +611,9 @@ export default class _Device extends Component {
                 <MenuItem
                     rightIcon={<ArrowDropRight />}
                     menuItems={ this.props.sensors.items.map(s => <MenuItem onTouchTap={ () => { this.addSensorToProjectDevice(s); } } primaryText={ s.title } />) }
-                    >добавить датчик</MenuItem>
+                    >
+                    добавить датчик
+                </MenuItem>
                 <MenuItem onTouchTap={ () => { this.removeDeviceFromProject(device); }} rightIcon={<DeleteIcon  />}>удалить</MenuItem>
             </IconMenu>
         );
@@ -739,9 +737,8 @@ export default class _Device extends Component {
                         name="sensorDataType"
                         ref={ s._id + 'sensorDataType' }
                         value={ this.state[s._id + 'sensorDataType'] || s.dataType }
-                        defaultValue={ s.dataType }
+                        defaultValue={ s.dataType || Object.keys(IEEE754)[0] }
                     >
-                        <MenuItem value={ ' ' } primaryText="" />
                         { Object.keys(IEEE754).map(v => <MenuItem key={ v } value={ v } primaryText={ v } />) }
                     </SelectField>
                 </TableRowColumn>
@@ -760,7 +757,6 @@ export default class _Device extends Component {
                             }))
                         } }
                     >
-                        <MenuItem value={ ' ' } primaryText={ null } />
                         <MenuItem value={ 'R' } primaryText="R" />
                         <MenuItem value={ 'RW' } primaryText="RW" />
                         <MenuItem value={ 'W' } primaryText="W" />
@@ -817,7 +813,7 @@ export default class _Device extends Component {
                                                         this.removeRegistryFromProjectDeviceSensor(s, r)
                                                     } : null }
                                                     onTouchTap={ () => {
-                                                        if (s.editMode && s.permission !== 'R') {
+                                                        if (!s.editMode && s.permission !== 'R') {
                                                             this.setState(Object.assign({}, this.state, {
                                                                 registryMode: null,
                                                                 registerDialogIsOpen: true,
@@ -881,7 +877,7 @@ export default class _Device extends Component {
                 />
                 <RegisterAdd
                     disabled={ reducer.isLoading }
-                    registers={ [] }
+                    registers={ this.state.s && Array.isArray(this.state.s.registers) ? this.state.s.registers : [] }
                     open={ this.state.registerDialogIsOpen && this.state.registryMode === 'add' }
                     close={ () => {
                         this.setState(Object.assign({}, this.state, {
@@ -896,7 +892,7 @@ export default class _Device extends Component {
                 <RegisterWrite
                     disabled={ reducer.isLoading }
                     register={ this.state.r }
-                    dataType={ 'Float' }
+                    dataType={ this.state.s && this.state.s.dataType ? this.state.s.dataType : ''  }
                     socket={ this.props.socket }
                     open={ this.state.registerDialogIsOpen && this.state.registryMode != 'add' }
                     close={ () => {
@@ -942,7 +938,14 @@ export default class _Device extends Component {
                 <div style={{ display: 'flex', flexDirection: 'column', flexBasis: '238px', maxWidth: '238px' }}>
                     <h3 className={ styles['projects-project-devices__title'] }>
                         <div style={{ verticalAlign: 'top', display: 'inline-block', height: '48px' }}>Устройства</div>
-                        { AddDeviceMenu }
+                        { (reducer.selectedProject && Array.isArray(reducer.items) && reducer.items.length) ? AddDeviceMenu : <IconButton
+                            style={{ float: 'right' }}
+                            disabled={true}
+                        >
+                            <PlusIcon
+                                color={grey400}
+                            ></PlusIcon>
+                        </IconButton> }
                         <div style={{ clear: 'both' }}></div>
                     </h3>
                     <List className={ styles['projects-project-devices'] }>
@@ -961,7 +964,7 @@ export default class _Device extends Component {
                             }
                             secondaryText={
                                 <p title={d.sensors && d.sensors.length ? d.sensors.map(s => s.title).join(', ') : null}>
-                                    { d.sensors && d.sensors.length ? d.sensors.map(s => s.title).join(', ') : '&nbsp;' }
+                                    { d.sensors && d.sensors.length ? d.sensors.map(s => s.title).join(', ') : ' ' }
                                 </p>
                             }
                         />
@@ -994,6 +997,7 @@ export default class _Device extends Component {
                             </IconButton>
 
                             <IconButton
+                                disabled={!Array.isArray(reducer.items) || !reducer.items.length}
                                 tooltip="экспорт проектов"
                                 tooltipPosition="bottom-left"
                                 style={{ alignSelf: 'center' }}
@@ -1001,7 +1005,7 @@ export default class _Device extends Component {
                                 <DownloadIcon/>
                             </IconButton>
 
-                            <IconMenu
+                            { Array.isArray(reducer.items) && reducer.items.length ? <IconMenu
                                 height={ 200 }
                                 iconButtonElement={ ProjectsIconButton }
                                 anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
@@ -1010,7 +1014,12 @@ export default class _Device extends Component {
                                 { reducer.items.map(p => {
                                     return <MenuItem key={p._id} onTouchTap={ () => { this.props.dictionaryProjectSelect(p._id); } }>{ p.title }</MenuItem>
                                 }) }
-                            </IconMenu>
+                            </IconMenu> : <IconButton
+                                disabled={true}
+                            >
+                                <ListIcon />
+                            </IconButton> }
+
 
                             <IconMenu
                                 iconButtonElement={ AddProjectIconButton }

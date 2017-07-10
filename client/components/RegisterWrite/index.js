@@ -44,7 +44,11 @@ export default class RegisterWrite extends Component {
         if (!nextProps.register && this.props.open) nextProps.close();
     }
     /*componentDidUpdate(prevProps, prevState) {}*/
-    /*shouldComponentUpdate (nextProps, nextState) { return true; }*/
+    shouldComponentUpdate (nextProps, nextState) {
+        if (this.state.error == nextState.error && this.state.success == nextState.success && this.props.open == nextProps.open && this.props.dataType == nextProps.dataType && this.props.register == nextProps.register) return false;
+        // if (nextProps.dataType === '') return false;
+        return true;
+    }
 
     socketListensers = {
         'WRITE_HOLDING_REGISTERS_SUCCESS': data => {
@@ -125,6 +129,8 @@ export default class RegisterWrite extends Component {
 
         const errStyle      = { color: red500 };
         const successStyle  = { color: cyan500 };
+
+        console.log('RENDER')
 
         const actions = [
             <FlatButton

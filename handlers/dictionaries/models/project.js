@@ -26,11 +26,18 @@ const projectSchema = new mongoose.Schema({
                 title: { type: String },
                 img: { type: String },
                 measure: { type: String },
+                type: {
+                    type: String,
+                    trim: true,
+                    required: 'SENSOR_TYPE_REQUIRED',
+                    lowercase: true,
+                    enum: ['числовой', 'дискретный']
+                },
                 name_short: { type: String },
                 name_dispatch: { type: String },
-                dataType: { type: String, enum: Object.keys(numTypes), default: 'Float' },
+                dataType: { type: String, enum: Object.keys(numTypes) },
                 bytes: { type: Number },
-                permission: { type: String },
+                permission: { type: String, enum: ['R', 'W', 'RW'], uppercase: true, },
                 registers: [{ type: String }]
             }],
         }],

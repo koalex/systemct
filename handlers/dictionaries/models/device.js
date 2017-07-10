@@ -10,6 +10,7 @@
 
 const mongoose = require('../../../libs/mongoose');
 const history  = require('mongoose-version');
+const numTypes = require('../../../libs/IEEE754');
 
 const deviceSchema = new mongoose.Schema({
         title: { type: String, trim: true, required: 'DEVICE_TITLE_REQUIRED' },
@@ -18,7 +19,14 @@ const deviceSchema = new mongoose.Schema({
             _id: { type: String, required: true },
             title: { type: String },
             img: { type: String },
-            dataType: { type: String },
+            dataType: { type: String, enum: Object.keys(numTypes) },
+            type: {
+                type: String,
+                trim: true,
+                required: 'SENSOR_TYPE_REQUIRED',
+                lowercase: true,
+                enum: ['числовой', 'дискретный']
+            },
             permission: { type: String },
             registers: [{ type: String }]
         }],

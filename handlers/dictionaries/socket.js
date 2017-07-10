@@ -12,6 +12,7 @@ const modbus    = require('jsmodbus');
 const IEEE754   = require('../../libs/IEEE754');
 const url       = require('url');
 
+let connectId;
 
 module.exports = [
     async args => {
@@ -24,9 +25,9 @@ module.exports = [
             let client      = modbus.client.tcp.complete({
                 'host'              : connection.hostname,
                 'port'              : connection.port,
-                'autoReconnect'     : true,
-                'reconnectTimeout'  : 1000,
-                'timeout'           : 5000,
+                'autoReconnect'     : false,
+                'reconnectTimeout'  : 3000,
+                'timeout'           : 3000,
                 'unitId'            : 1
             });
 
@@ -34,8 +35,13 @@ module.exports = [
 
             client.connect();
 
+            let _connectId = Math.random().toString(34).slice(2);
+
+            connectId = _connectId.substring();
+
             client.on('error', err => {
-                data.registers.forEach(r => {
+                if (_connectId != connectId) return;
+                data.registers.forEach((r, i) => {
                     adapter.emitter.of('/api').to(socket.user.role).emit('READ_HOLDING_REGISTERS_ERROR', {
                         error: err,
                         deviceId: data.deviceId,
@@ -46,6 +52,8 @@ module.exports = [
             });
 
             client.on('connect', () => {
+                // client.getState() === connect
+                // client.getState() === error
                 data.registers.forEach(r => {
                     promises.push(
                         client.readHoldingRegisters(r, IEEE754[data.dataType].bits / 16)
@@ -94,7 +102,7 @@ module.exports = [
                     )
                 });
 
-                Promise.all(promises).then(() => { client.close(); }, () => { client.close(); })
+                Promise.all(promises).then(() => { client.close();  }, () => { client.close();  })
             });
 
         });
@@ -117,8 +125,12 @@ module.exports = [
             });
 
             client.connect();
+            let _connectId = Math.random().toString(34).slice(2);
+
+            connectId = _connectId.substring();
 
             client.on('error', err => {
+                if (_connectId != connectId) return;
                 if (!Array.isArray(data.registers)) return;
                 data.registers.forEach(r => {
                     userSocketSessionIds.forEach(s_id => {

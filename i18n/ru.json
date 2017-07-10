@@ -59,5 +59,7 @@
 	"CANNOT_IDENT_DEVICE": "неверный ObjectID устройства",
 	"READ_REGISTER_ERROR": "ошибка чтения регистра",
 	"WRITE_REGISTER_ERROR": "ошибка записи регистра",
-	"INTEGER_UNSAFE": "> 9007199254740991"
+	"INTEGER_UNSAFE": "> 9007199254740991",
+	"Cast to ObjectId failed for value \"null\" at path \"_id\" for model \"Project\"": "Cast to ObjectId failed for value \"null\" at path \"_id\" for model \"Project\"",
+	"Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Project\"": "Cast to ObjectId failed for value \"undefined\" at path \"_id\" for model \"Project\""
 }

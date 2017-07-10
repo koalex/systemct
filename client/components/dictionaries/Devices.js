@@ -157,6 +157,8 @@ export default class _Device extends Component {
 
     addSensor = sensor => {
         if (this.props.devices.device) {
+            sensor.dataType = Object.keys(IEEE754)[0];
+            sensor.permission = 'RW';
             this.props.addDeviceSensor(sensor);
         }
     };
