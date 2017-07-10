@@ -41,6 +41,10 @@ import ImageIcon                 from 'material-ui/svg-icons/image/image';
 import Paper from 'material-ui/Paper';
 import CircularProgress                                     from 'material-ui/CircularProgress';
 
+import RegisterAdd      from '../RegisterAdd';
+import IEEE754          from '../../../libs/IEEE754_client.js';
+
+
 import { connect }              from 'react-redux';
 import { deviceSensorDelete, deviceSensorEdit, addDeviceSensor, setCurrentDevice, dictionaryCreate, dictionaryRead, dictionaryUpdate, dictionaryDelete, dictionaryExport, dictionaryImport, modalShow, modalHide, inputChange, dispatch } from '../../actions';
 import { DICTIONARY, UGO, SENSOR, DEVICE, MODAL, _DROP, _CREATE, _UPDATE, _DELETE, _IMPORT, _SUCCESS, _ERROR, _CLEAR, _HIDE } from '../../actions/constants';
@@ -238,66 +242,6 @@ export default class _Device extends Component {
             />
 
         ];
-
-        const registersActions = [
-            <FlatButton
-                label="OK"
-                primary={ true }
-                keyboardFocused={ false }
-                onTouchTap={ () => {
-                    if (!this.state.registerValue || !this.state.registerValue.trim()) {
-                        this.setState(Object.assign({}, this.state, {
-                            registerError: 'не заполнено'
-                        }));
-                        return;
-                    }
-
-                    if (isNaN(this.state.registerValue)) {
-                        this.setState(Object.assign({}, this.state, {
-                            registerError: 'некорректный регистр'
-                        }));
-                        return;
-                    }
-
-                    if (Array.isArray(this.state.currentSensor.registers)) {
-                        if (this.state.currentSensor.registers.some(r => Number(r) === Number(this.state.registerValue))) {
-                            this.setState(Object.assign({}, this.state, {
-                                registerError: 'такой регистр уже есть'
-                            }));
-                            return;
-                        }
-                        this.state.currentSensor.registers.push(this.state.registerValue);
-                    } else {
-                        this.state.currentSensor.registers = [this.state.registerValue];
-                    }
-                    this.props.deviceSensorEdit( Object.assign({}, this.state.currentSensor, {
-                        registers: this.state.currentSensor.registers.map(v => v)
-                    }) );
-                    this.setState(Object.assign({}, this.state, {
-                        registerError: null,
-                        currentSensor: null,
-                        registerDialog: false,
-                        registerValue: null
-                    }))
-                } }
-                disabled={ reducer.isLoading }
-            />,
-            <FlatButton
-                label="Отмена"
-                primary={ true }
-                keyboardFocused={ false }
-                onTouchTap={ () => {
-                    this.setState(Object.assign({}, this.state, {
-                        registerError: null,
-                        currentSensor: null,
-                        registerDialog: false,
-                        registerValue: null
-                    }))
-                } }
-                disabled={ reducer.isLoading }
-            />
-        ];
-
         const chipStyle = { margin: '5px' };
 
         let dropzoneRef;
@@ -314,80 +258,68 @@ export default class _Device extends Component {
                     }
                 </TableRowColumn>
                 <TableRowColumn style={{ width: '240px' }}>
-                    <Chip
-                        onTouchTap={ ()=>{} }
-                    >
-                        <Avatar src={ sensor.img || '/uploads/0ff41bd8b.png' } />
-                        { sensor.title }
-                    </Chip>
+                    <div style={{ display: 'inline-block', textAlign: 'left' }}>
+                        <img src={ sensor.img || '/uploads/0ff41bd8b.png' } alt={ sensor.title }/>
+                        <br/>
+                        <strong style={{ fontWeight: 'bold', textTransform: 'uppercase' }} title={ sensor.title }>
+                            { sensor.title }
+                        </strong>
+                    </div>
                 </TableRowColumn>
                 {/*<TableRowColumn>Действующее значение сигнала канала</TableRowColumn>*/}
-                <TableRowColumn style={{ width: '80px' }}>
-                    { sensor.editMode ? <SelectField
+                <TableRowColumn style={{ width: '180px' }}>
+                    <SelectField
+                        disabled={ !sensor.editMode }
+                        style={{ width: '180px', verticalAlign: 'bottom' }}
+                        iconStyle={{ opacity: sensor.editMode ? 1 : 0 }}
+                        underlineStyle={{ opacity: sensor.editMode ? 1 : 0 }}
                         onChange={ (event, index, value) => { this.props.deviceSensorEdit( Object.assign({}, sensor, { dataType: value }) ); } }
                         name="sensorDataType"
                         ref={ sensor._id + 'sensorDataType' }
-                        style={{ width: '150px' }}
                         value={ sensor.dataType }
                         defaultValue={ sensor.dataType }
                     >
                         <MenuItem value={ ' ' } primaryText="" />
-                        <MenuItem value={ 'float' } primaryText="float" />
-                        <MenuItem value={ 'double' } primaryText="double" />
-                        <MenuItem value={ 'unsigned short' } primaryText="unsigned short" />
-                    </SelectField> : sensor.dataType || null }
+                        { Object.keys(IEEE754).map(v => <MenuItem key={ v } value={ v } primaryText={ v } />) }
+                    </SelectField>
                 </TableRowColumn>
-                <TableRowColumn style={{ width: '80px' }}>
-                    { sensor.editMode ? <SelectField
-                        style={{ width: '80px' }}
-                        disabled={ !sensor.editMode }
-                        name="sensorBytes"
-                        ref={ sensor._id + 'sensorBytes' }
-                        defaultValue={ sensor.bytes }
-                        value={ sensor.bytes }
-                        onChange={ (event, index, value) => { this.props.deviceSensorEdit( Object.assign({}, sensor, { bytes: value }) ); } }
-                    >
-                        <MenuItem value={ 0 } primaryText={ null } />
-                        <MenuItem value={ 1 } primaryText="1" />
-                        <MenuItem value={ 2 } primaryText="2" />
-                        <MenuItem value={ 3 } primaryText="3" />
-                        <MenuItem value={ 4 } primaryText="4" />
-                        <MenuItem value={ 5 } primaryText="5" />
-                        <MenuItem value={ 6 } primaryText="6" />
-                        <MenuItem value={ 7 } primaryText="7" />
-                        <MenuItem value={ 8 } primaryText="8" />
-                        <MenuItem value={ 9 } primaryText="9" />
-                        <MenuItem value={ 10 } primaryText="10" />
-                        <MenuItem value={ 11 } primaryText="11" />
-                        <MenuItem value={ 12 } primaryText="12" />
-                        <MenuItem value={ 13 } primaryText="13" />
-                        <MenuItem value={ 14 } primaryText="14" />
-                        <MenuItem value={ 15 } primaryText="15" />
-                        <MenuItem value={ 16 } primaryText="16" />
-                    </SelectField> : sensor.bytes || null }
 
-                </TableRowColumn>
-                <TableRowColumn style={{ width: '80px' }}>
-                    { sensor.editMode ? <SelectField
-                        style={{ width: '80px' }}
+                <TableRowColumn style={{ width: '90px' }}>
+                    <SelectField
+                        disabled={ !sensor.editMode }
+                        style={{ width: '90px', verticalAlign: 'bottom' }}
+                        iconStyle={{ opacity: sensor.editMode ? 1 : 0 }}
+                        underlineStyle={{ opacity: sensor.editMode ? 1 : 0 }}
                         defaultValue={ sensor.permission }
                         value={ sensor.permission }
                         onChange={ (event, index, value) => { this.props.deviceSensorEdit( Object.assign({}, sensor, { permission: value }) ); } }
-
                     >
                         <MenuItem value={ ' ' } primaryText={ null } />
                         <MenuItem value={ 'R' } primaryText="R" />
                         <MenuItem value={ 'RW' } primaryText="RW" />
                         <MenuItem value={ 'W' } primaryText="W" />
-                    </SelectField> : sensor.permission || null }
+                    </SelectField>
                 </TableRowColumn>
+
                 <TableRowColumn>
-                    { sensor.editMode ? <FloatingActionButton mini={ true } style={{ display: 'inline-block', float: 'left', margin: '5px' }}
+
+                    <FloatingActionButton
+                        disabled={ !sensor.editMode }
+                        mini={ true }
+                        style={{ display: 'inline-block', float: 'left', margin: '5px' }}
+                        onTouchTap={ () => {
+                            this.setState(Object.assign({}, this.state, { registerDialog: true, currentSensor: sensor }));
+                        } } >
+
+                        <PlusIcon />
+                    </FloatingActionButton>
+
+                    {/*{ sensor.editMode ? <FloatingActionButton disabled={ sensor.editMode } mini={ true } style={{ display: 'inline-block', float: 'left', margin: '5px' }}
                         onTouchTap={ () => {
                             this.setState(Object.assign({}, this.state, { registerDialog: true, currentSensor: sensor }));
                         } } >
                         <PlusIcon />
-                    </FloatingActionButton> : null  }
+                    </FloatingActionButton> : null  }*/}
                     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', height: 'auto' }}>
                         { sensor.registers ? sensor.registers.map((register, i) => <Chip
                             key={ register + i }
@@ -402,6 +334,8 @@ export default class _Device extends Component {
                             onTouchTap={ ()=>{} }
                         >{ register }</Chip>) : null }
                     </div>
+
+
                 </TableRowColumn>
                 <TableRowColumn style={{ width: '50px'}}>
                     <IconButton onTouchTap={ () => { this.props.deviceSensorDelete(sensor); this.submit(); } }>
@@ -410,8 +344,39 @@ export default class _Device extends Component {
                 </TableRowColumn>
             </TableRow>)
         }) : null;
+
+
         return (
             <div className={ styles['devices-table-wrapper'] } >
+                <RegisterAdd
+                    disabled={ reducer.isLoading }
+                    registers={ this.state.currentSensor ? this.state.currentSensor.registers : [] }
+                    open={ this.state.registerDialog }
+                    close={ () => {
+                        this.setState(Object.assign({}, this.state, {
+                            registerError: null,
+                            currentSensor: null,
+                            registerDialog: false,
+                            registerValue: null
+                        }))
+                    } }
+                    submit={ register => {
+                        let registers = this.state.currentSensor.registers.map(v => v);
+                            registers.push(register);
+
+                        this.props.deviceSensorEdit( Object.assign({}, this.state.currentSensor, {
+                            registers: registers
+                        }) );
+
+                        this.setState(Object.assign({}, this.state, {
+                            registerError: null,
+                            currentSensor: null,
+                            registerDialog: false,
+                            registerValue: null
+                        }))
+                    } }
+                />
+
                 { reducer.isLoading ? <div>
                     <CircularProgress
                         style={{ position: 'fixed', top: 'calc(50% - 100px)', left: 'calc(50% - 100px)' }}
@@ -433,9 +398,9 @@ export default class _Device extends Component {
                             </TableHeaderColumn>
                             <TableHeaderColumn style={{ width: '240px' }}>Датчик</TableHeaderColumn>
                             {/*<TableHeaderColumn>Описание</TableHeaderColumn>*/}
-                            <TableHeaderColumn style={{ width: '80px' }}>Тип данных</TableHeaderColumn>
-                            <TableHeaderColumn style={{ width: '80px' }}>Кол-во байт</TableHeaderColumn>
-                            <TableHeaderColumn style={{ width: '80px' }}>Доступ</TableHeaderColumn>
+                            <TableHeaderColumn style={{ width: '180px' }}>Тип данных</TableHeaderColumn>
+                            {/*<TableHeaderColumn style={{ width: '80px' }}>Кол-во байт</TableHeaderColumn>*/}
+                            <TableHeaderColumn style={{ width: '90px' }}>Доступ</TableHeaderColumn>
                             <TableHeaderColumn>Регистры</TableHeaderColumn>
                             <TableHeaderColumn style={{ width: '50px'}}>
 
@@ -505,70 +470,6 @@ export default class _Device extends Component {
                     className={ styles['devices-download-btn'] }>
                     <DownloadIcon />
                 </FloatingActionButton>
-
-                <Dialog
-                    actions={ registersActions }
-                    modal={ true }
-                    contentStyle={{ width: '304px' }}
-                    autoScrollBodyContent={ false }
-                    open={ this.state.registerDialog }
-                >
-                    <div style={{ height: '50px' }}>
-                        <TextField
-                            autoFocus
-                            onKeyPress={ ev => {
-                                if (ev.key === 'Enter') {
-                                    ev.preventDefault();
-                                    if (!this.state.registerValue || !this.state.registerValue.trim()) {
-                                        this.setState(Object.assign({}, this.state, {
-                                            registerError: 'не заполнено'
-                                        }));
-                                        return;
-                                    }
-
-                                    if (isNaN(this.state.registerValue)) {
-                                        this.setState(Object.assign({}, this.state, {
-                                            registerError: 'некорректный регистр'
-                                        }));
-                                        return;
-                                    }
-
-                                    if (Array.isArray(this.state.currentSensor.registers)) {
-                                        if (this.state.currentSensor.registers.some(r => Number(r) === Number(this.state.registerValue))) {
-                                            this.setState(Object.assign({}, this.state, {
-                                                registerError: 'такой регистр уже есть'
-                                            }));
-                                            return;
-                                        }
-                                        this.state.currentSensor.registers.push(this.state.registerValue);
-                                    } else {
-                                        this.state.currentSensor.registers = [this.state.registerValue];
-                                    }
-                                    this.props.deviceSensorEdit( Object.assign({}, this.state.currentSensor, {
-                                        registers: this.state.currentSensor.registers.map(v => v)
-                                    }) );
-                                    this.setState(Object.assign({}, this.state, {
-                                        registerError: null,
-                                        currentSensor: null,
-                                        registerDialog: false,
-                                        registerValue: null
-                                    }))
-                                }
-                            }}
-                            name="newRegisterValue"
-                            ref="newRegisterValue"
-                            onChange={ () => {
-                                this.setState(Object.assign({}, this.state, {
-                                    registerError: null,
-                                    registerValue: this.refs.newRegisterValue.input.value
-                                }))
-                            } }
-                            hintText='например 0x0001'
-                            errorText={ this.state.registerError }
-                        ></TextField>
-                    </div>
-
-                </Dialog>
 
                 <Dialog
                     title={ reducer.device._id ? reducer.device.title.substring() : 'Добавить устройство' }

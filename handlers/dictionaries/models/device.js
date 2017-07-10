@@ -19,7 +19,6 @@ const deviceSchema = new mongoose.Schema({
             title: { type: String },
             img: { type: String },
             dataType: { type: String },
-            bytes: { type: Number },
             permission: { type: String },
             registers: [{ type: String }]
         }],
