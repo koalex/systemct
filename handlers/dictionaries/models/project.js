@@ -13,6 +13,7 @@ const history  = require('mongoose-version');
 const numTypes = require('../../../libs/IEEE754');
 
 const projectSchema = new mongoose.Schema({
+        active: { type: Boolean, default: false, required: true },
         title: { type: String, trim: true, required: 'PROJECT_TITLE_REQUIRED' },
         devices: [{
             _id: { type: String, required: 'CANNOT_IDENT_DEVICE' },
