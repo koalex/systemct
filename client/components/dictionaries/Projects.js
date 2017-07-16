@@ -22,6 +22,8 @@ import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
 import UploadIcon                from 'material-ui/svg-icons/file/file-upload';
 import DownloadIcon                from 'material-ui/svg-icons/file/file-download';
 import VisibilityIcon                from 'material-ui/svg-icons/action/visibility';
+import PlayIcon                from 'material-ui/svg-icons/av/play-arrow';
+import StopIcon                from 'material-ui/svg-icons/av/stop';
 import Chip from 'material-ui/Chip';
 import Avatar from 'material-ui/Avatar';
 
@@ -533,6 +535,15 @@ export default class _Device extends Component {
         });
     };
 
+    startStopProject = v => {
+
+        let projectUpdated = cloneProject(this.props.projects.selectedProject);
+
+        projectUpdated.active = v;
+
+        this.projectUpdate(projectUpdated);
+    };
+
     dictionaryImport = data => {
         this.props.dictionaryImport({
             dictionary: 'projects',
@@ -975,8 +986,16 @@ export default class _Device extends Component {
 
                 <div className={ styles['projects-devices-detail'] }>
                     <h3 className={ styles['projects-project-devices__title'] } style={{ position: 'relative' }}>
-                        <span>{ reducer.selectedProject.title }</span>
-
+                        <span style={{ verticalAlign: 'top' }}>{ reducer.selectedProject.title }</span>
+                        <span>{ reducer.selectedProject && reducer.selectedProject._id ?
+                            !reducer.selectedProject.active ? <IconButton
+                                onTouchTap={ () => {
+                                    this.startStopProject(true);
+                                } }
+                                tooltip="ЗАПУСТИТЬ ПРОЕКТ"><PlayIcon/></IconButton> : <IconButton onTouchTap={() => {
+                                this.startStopProject(false);
+                            }} tooltip="ОСТАНОВИТЬ ПРОЕКТ"><StopIcon/></IconButton>
+                            : null }</span>
                         <div style={{ position: 'absolute', right: '12px', top: 0 }}>
                             <IconButton
                                 tooltip="импорт проектов"
