@@ -1176,7 +1176,7 @@ export default class _Device extends Component {
 
                                         <TableHeaderColumn
                                             style={{ paddingLeft: '0px', paddingRight: 0, width: '64px' }}
-                                            rowSpan="2" tooltip="Апертура (только для анадлговых датчиков)"
+                                            rowSpan="2" tooltip="Апертура (только для аналоговых датчиков)"
                                         >
                                             Апертура
                                         </TableHeaderColumn>
