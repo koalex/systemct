@@ -88,7 +88,6 @@ export default class Users extends Component {
 
     componentDidMount () {
         this.props.usersRead();
-        window.socket = this.props.socket;
         for (let ev in this.socketListensers) {
             this.props.socket.on(ev, this.socketListensers[ev]);
         }

@@ -70,7 +70,7 @@ export default class Routes extends Component {
                 <div style={{ height: '100%' }}>
                     <Route
                         path='/'
-                        render={ props => this.props.common.isAuthenticated ?
+                        render={ props => true ?
                             <App {...props} socket={ connectToSocketAPI() }>
 
                                 <CSSTransitionGroup
@@ -85,6 +85,7 @@ export default class Routes extends Component {
                                     <Route key={ props.location.key + 3 } path="/dictionaries/sensors"  render={ props => <Sensors socket={ connectToSocketAPI() } {...props}></Sensors> }/>
                                     <Route key={ props.location.key + 4 } path="/dictionaries/devices"  render={ props => <Devices socket={ connectToSocketAPI() } {...props}></Devices> }/>
                                     <Route key={ props.location.key + 4856 } path="/dictionaries/projects"  render={ props => <Projects socket={ connectToSocketAPI() } {...props}></Projects> }/>
+                                    <Route key={ props.location.key + 48567 } path="/projects/logs"  component={ <h1>LOGS</h1> }/>
                                     <Route key={ props.location.key + 5 } path="/users"  render={ props => <Users {...props} socket={ connectToSocketAPI() }></Users> }/>
                                     <Route key={ props.location.key + 6 } path="/charts"  render={ props => <img style={{ width: '100%' }} src="https://image.shutterstock.com/z/stock-vector-flat-design-infographic-elements-charts-graphs-symbols-vector-eps-176674124.jpg" alt=""/> }/>
                                 </CSSTransitionGroup>

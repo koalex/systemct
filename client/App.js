@@ -20,7 +20,8 @@ import LibraryIcon          from 'material-ui/svg-icons/av/library-books';
 import ImageIcon            from 'material-ui/svg-icons/image/image';
 import SensorIcon           from 'material-ui/svg-icons/hardware/memory';
 import DevicesIcon          from 'material-ui/svg-icons/device/devices';
-import ProjectsIcon          from 'material-ui/svg-icons/file/folder';
+import ProjectsIcon         from 'material-ui/svg-icons/file/folder';
+import LogsIcon             from 'material-ui/svg-icons/action/receipt';
 
 
 import { connect }              from 'react-redux';
@@ -68,6 +69,11 @@ export default class App extends Component {
                     <Link to="/charts" className={styles['nav-link']}>
                         <MenuItem onTouchTap={ this.toggleDrawer } leftIcon={<ChartIcon />}>
                             Графики
+                        </MenuItem>
+                    </Link>
+                    <Link to="/logs" className={styles['nav-link']}>
+                        <MenuItem onTouchTap={ this.toggleDrawer } leftIcon={<LogsIcon />}>
+                            Логи
                         </MenuItem>
                     </Link>
                     { __USER__.role !== 'manager' ? <Link to="/users" className={styles['nav-link']}>

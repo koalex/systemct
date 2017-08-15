@@ -27,6 +27,10 @@ const projectSchema = new mongoose.Schema({
                 title: { type: String },
                 img: { type: String },
                 measure: { type: String },
+                advancedSettings: [{
+
+                }],
+                history:  { type: Boolean, default: true, required: true },
                 type: {
                     type: String,
                     trim: true,
@@ -59,6 +63,44 @@ const projectSchema = new mongoose.Schema({
         retainKeyOrder: true
     });
 
+projectSchema.pre('save', function (next) {
+    let err = null;
+
+    if (Array.isArray(this.devices) && this.devices.length) {
+        this.devices.forEach(device => {
+            if (Array.isArray(device.sensors) && device.sensors.length) {
+                device.sensors.forEach(sensor => {
+                    if (!Array.isArray(sensor.registers) || !sensor.registers.length) sensor.advancedSettings = [];
+                    if (Array.isArray(sensor.advancedSettings) && sensor.advancedSettings.length) {
+                        sensor.advancedSettings.forEach((setting, i) => {
+                            for (let k in setting) {
+                                if (!sensor.registers.every(r => !!setting[r])) {
+                                    err = new Error('Не совпадают регистры');
+                                    break;
+                                }
+                            }
+
+                            if (err) {
+                                console.log('err =', err)
+                                sensor.advancedSettings = [];
+                                next();
+                            } else {
+                                let fileds = sensor.registers.concat(['_id', 'color', 'blink', 'emergency', 'state', 'aperture']);
+                                if (setting._id) setting._id = mongoose.Types.ObjectId();
+
+                                let toDelete = Object.keys(setting).filter(sk => fileds.indexOf(sk) < 0);
+                                toDelete.forEach(delKey => delete setting[delKey]);
+                                if ('дискретный' === sensor.type) delete setting.type;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+    console.log('this =', this.devices[0].sensors)
+    next(/*err*/);
+});
 
 /*userSchema.virtual('password')
  .set(function (password) {

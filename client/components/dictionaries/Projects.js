@@ -18,7 +18,9 @@ import SelectField from 'material-ui/SelectField';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
+import Checkbox from 'material-ui/Checkbox';
 import ArrowDropRight from 'material-ui/svg-icons/navigation-arrow-drop-right';
+import SettingsIcon                from 'material-ui/svg-icons/action/settings';
 import UploadIcon                from 'material-ui/svg-icons/file/file-upload';
 import DownloadIcon                from 'material-ui/svg-icons/file/file-download';
 import VisibilityIcon                from 'material-ui/svg-icons/action/visibility';
@@ -58,6 +60,7 @@ import CircularProgress                                     from 'material-ui/Ci
 
 import IEEE754          from '../../../libs/IEEE754_client.js';
 import IpPort           from '../IpPort';
+import SensorAdvanced   from '../SensorAdvancedSettings';
 import RegisterAdd      from '../RegisterAdd';
 import RegisterWrite    from '../RegisterWrite';
 
@@ -201,7 +204,7 @@ export default class _Device extends Component {
 
         window.addEventListener('resize', ev => {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function() {
+            resizeTimer = setTimeout(function () {
 
                 tableHeight = parseInt(window.getComputedStyle(document.querySelector('.' + styles['projects-devices-detail'])).height) - 100 + 'px';
                 self.setState(Object.assign({}, self.state, { tableHeight: tableHeight }));
@@ -391,6 +394,9 @@ export default class _Device extends Component {
                     if (this.state[s._id + 'sensorPermission']) {
                         s.permission = this.state[s._id + 'sensorPermission'];
                     }
+                    if (this.state[s._id + 'sensorHistory'] != null) {
+                        s.history = this.state[s._id + 'sensorHistory'];
+                    }
                 }
             });
         });
@@ -400,7 +406,8 @@ export default class _Device extends Component {
             [sensor._id + 'sensorDataType']: null,
             [sensor._id + 'sensorBytes']: null,
             [sensor._id + 'sensorPermission']: null,
-            [sensor._id + 'sensorMeasure']: null
+            [sensor._id + 'sensorMeasure']: null,
+            [sensor._id + 'sensorHistory']: null
         }))
     };
 
@@ -544,6 +551,23 @@ export default class _Device extends Component {
         this.projectUpdate(projectUpdated);
     };
 
+    advancedSettingsSave = (deviceId, sensor) => {
+        let projectClone = cloneProject(this.props.projects.selectedProject);
+        // this.state.selectedDevice
+        projectClone.devices.forEach(device => {
+            if (this.state.selectedDevice._id === deviceId) {
+                device.sensors.forEach(_sensor => {
+                    if (_sensor._id === sensor._id) {
+                        _sensor.advancedSettings = sensor.advancedSettings.map(v => v);
+                    }
+                });
+            }
+        });
+        this.projectUpdate(projectClone);
+
+        this.props.modalHide({ modalType: 'SENSOR_ADVANCED' });
+    };
+
     dictionaryImport = data => {
         this.props.dictionaryImport({
             dictionary: 'projects',
@@ -664,6 +688,17 @@ export default class _Device extends Component {
                         </IconButton>
                     }
                 </TableRowColumn>
+                <TableRowColumn style={{ overflow: 'visible', paddingLeft: 0, width: '50px' }}>
+                    <IconButton
+                        tooltip="дополнительные настройки"
+                        tooltipPosition="bottom-right"
+                        onTouchTap={ () => {
+                            this.props.modalShow({ modalType: 'SENSOR_ADVANCED', deviceId: selectedDevice._id, sensor: s });
+                        } }
+                    >
+                        <SettingsIcon/>
+                    </IconButton>
+                </TableRowColumn>
                 {/*2*/}
                 <TableRowColumn style={{ paddingLeft: 0, paddingRight: 0, width: '140px' }}>
                     <div style={{ display: 'inline-block', textAlign: 'left' }}>
@@ -696,6 +731,19 @@ export default class _Device extends Component {
                         <MenuItem value={ 'В' } primaryText="В" />
                         <MenuItem value={ 'Ом' } primaryText="Ом" />
                     </SelectField>
+                </TableRowColumn>
+                <TableRowColumn style={{ paddingLeft: '10px', width: '54px' }}>
+                    <Checkbox
+                        name="sensorHistory"
+                        ref={ s._id + 'sensorHistory' }
+                        disabled={ !s.editMode }
+                        defaultChecked={ s.history }
+                        onCheck={ (ev, isInputChecked) => {
+                            this.setState(Object.assign({}, this.state, {
+                                [s._id + 'sensorHistory']: isInputChecked
+                            }))
+                        } }
+                    />
                 </TableRowColumn>
                 {/*4*/}
                 <TableRowColumn style={{ width: '112px'}}>
@@ -874,6 +922,19 @@ export default class _Device extends Component {
 
         return (
             <div className={ styles['projects-container'] }>
+                { reducer.sensor && reducer.sensorAdvanced ? <SensorAdvanced
+                    open={ reducer.sensorAdvanced }
+                    disabled={ reducer.isLoading }
+                    deviceId={ reducer.deviceId }
+                    sensor={ reducer.sensor }
+                    submit={ result => {
+                        let { deviceId, sensor } = result;
+                        this.advancedSettingsSave(deviceId, sensor);
+                    } }
+                    close={ () => {
+                        this.props.modalHide({ modalType: 'SENSOR_ADVANCED' });
+                    } }
+                /> : null }
                 <IpPort
                     disabled={ reducer.isLoading }
                     ip={ this.state.selectedDevice ? this.state.selectedDevice.ip : null }
@@ -1011,7 +1072,6 @@ export default class _Device extends Component {
                                     onDrop={ this.dictionaryImport }>
 
                                 </Dropzone>
-                            >
                                 <UploadIcon/>
                             </IconButton>
 
@@ -1075,6 +1135,7 @@ export default class _Device extends Component {
                                         >
                                             {/*Редактировать/Сохранить*/}
                                         </TableHeaderColumn>
+                                        <TableHeaderColumn rowSpan="2" style={{ paddingLeft: 0, width: '50px' }}></TableHeaderColumn>
                                         <TableHeaderColumn
                                             style={{ paddingLeft: 0, paddingRight: 0, width: '140px' }}
                                             rowSpan="2" tooltip="Название датчика"
@@ -1087,6 +1148,13 @@ export default class _Device extends Component {
                                         >
                                             Единицы <br/>
                                             измерения
+                                        </TableHeaderColumn>
+                                        <TableHeaderColumn
+                                            style={{ paddingLeft: '10px', width: '54px' }}
+                                            rowSpan="2" tooltip="Записывать данные по датчику в историю изменений"
+                                        >
+                                            Писать в<br/>
+                                            историю
                                         </TableHeaderColumn>
                                         <TableHeaderColumn style={{ width: '272px', textAlign: 'center' }} colSpan="2">
                                             Наименование

@@ -1,6 +1,17 @@
 'use strict';
 
-import { AUTH, _IMPORT, _EXPORT, _CHECK, SIGNOUT, MODAL, _SHOW, _HIDE, _CHANGE, _SELECT, SIGNIN, USERS, DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
+import {
+    AUTH,
+    _IMPORT,
+    _EXPORT,
+    _CHECK,
+    SIGNOUT,
+    MODAL,
+    _SHOW,
+    _HIDE,
+    _CHANGE,
+    _SELECT,
+    SIGNIN, USERS, DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
 
 export function dispatch (data) {
     const { type, ...rest } = data;
@@ -75,17 +86,6 @@ export function usersCreate (user, opts = {}) {
         }
     }
 }
-
-/*export function getUsers () { // OLD
-    return {
-        type: USERS + _READ,
-        CALL_API: {
-            endpoint: '/api/users',
-            method: 'GET'
-        },
-
-    }
-}*/
 
 export function usersRead () {
     return {

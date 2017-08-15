@@ -23,6 +23,7 @@ const UGO             = 'UGO:';
 const SENSOR          = 'SENSOR:';
 const DEVICE          = 'DEVICE:';
 const PROJECT         = 'PROJECT:';
+const LOGS            = 'LOGS:';
 const MODAL           = 'MODAL:';
 const ACTIVITY        = 'ACTIVITY:';
 
@@ -54,6 +55,7 @@ module.exports = {
     SENSOR,
     DEVICE,
     PROJECT,
+    LOGS,
     ACTIVITY,
     MODAL,
 

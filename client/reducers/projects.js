@@ -17,7 +17,8 @@ const defaultState = {
         img: null,
         devices: []
     },
-    items: []
+    items: [],
+    sensorAdvanced: false
 };
 
 function cloneProject (project) {
@@ -459,6 +460,18 @@ export default function (state = defaultState, action) {
                 });
             }
 
+            if ('SENSOR_ADVANCED' === data.modalType) {
+                return Object.assign({}, state, {
+                    isLoading: false,
+                    error: false,
+                    errors: {},
+                    items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : [],
+                    deviceId: data.deviceId,
+                    sensor: Object.assign({}, data.sensor, { registers: data.sensor.registers.map(r => r) }),
+                    sensorAdvanced: true
+                });
+            }
+
             return state;
 
             break;
@@ -483,6 +496,18 @@ export default function (state = defaultState, action) {
                         devices: []
                     },
                     items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : []
+                });
+            }
+
+            if ('SENSOR_ADVANCED' === data.modalType) {
+                return Object.assign({}, state, {
+                    isLoading: false,
+                    error: false,
+                    errors: {},
+                    items: Array.isArray(state.items) && state.items.length ? state.items.map(p => cloneProject(p)) : [],
+                    deviceId: null,
+                    sensor: null,
+                    sensorAdvanced: false
                 });
             }
 
