@@ -36,8 +36,6 @@ class SensorAdvancedSettings extends Component {
             colorPicker: false
         };
 
-        console.log(props.deviceId)
-        console.log(props.sensor)
         if (props.sensor && Array.isArray(props.sensor.advancedSettings) && props.sensor.advancedSettings.length) {
             props.sensor.advancedSettings.forEach(setting => {
                 this.state.settings[setting._id] = {};
@@ -193,7 +191,7 @@ class SensorAdvancedSettings extends Component {
                 primary={ true }
                 keyboardFocused={ false }
                 onTouchTap={ this.submit }
-                disabled={ this.props.disabled }
+                disabled={ this.props.disabled || !this.props.sensor || !Array.isArray(this.props.sensor.registers) || !this.props.sensor.registers.length }
             />,
             <FlatButton
                 label="Отмена"

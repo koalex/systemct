@@ -700,7 +700,7 @@ export default class _Device extends Component {
                     </IconButton>
                 </TableRowColumn>
                 {/*2*/}
-                <TableRowColumn style={{ paddingLeft: 0, paddingRight: 0, width: '140px' }}>
+                <TableRowColumn style={{ paddingLeft: 0, paddingRight: 0, width: '130px' }}>
                     <div style={{ display: 'inline-block', textAlign: 'left' }}>
                         <img src={ s.img } alt=""/>
                         <br/>
@@ -710,7 +710,7 @@ export default class _Device extends Component {
                     </div>
                 </TableRowColumn>
                 {/*3*/}
-                <TableRowColumn style={{ paddingLeft: '10px', width: '64px' }}>
+                <TableRowColumn style={{ paddingLeft: '0px', width: '64px' }}>
                     <SelectField
                         disabled={ !s.editMode }
                         iconStyle={{ opacity: s.editMode ? 1 : 0, paddingRight: '0px', fill: '#000', textAlign: 'right' }}
@@ -1137,13 +1137,13 @@ export default class _Device extends Component {
                                         </TableHeaderColumn>
                                         <TableHeaderColumn rowSpan="2" style={{ paddingLeft: 0, width: '50px' }}></TableHeaderColumn>
                                         <TableHeaderColumn
-                                            style={{ paddingLeft: 0, paddingRight: 0, width: '140px' }}
+                                            style={{ paddingLeft: 0, paddingRight: 0, width: '130px' }}
                                             rowSpan="2" tooltip="Название датчика"
                                         >
                                             Датчик
                                         </TableHeaderColumn>
                                         <TableHeaderColumn
-                                            style={{ paddingLeft: '10px', width: '64px' }}
+                                            style={{ paddingLeft: '0px', width: '64px' }}
                                             rowSpan="2" tooltip="Единицы измерения"
                                         >
                                             Единицы <br/>

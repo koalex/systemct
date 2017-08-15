@@ -81,7 +81,6 @@ projectSchema.pre('save', function (next) {
                             }
 
                             if (err) {
-                                console.log('err =', err)
                                 sensor.advancedSettings = [];
                                 next();
                             } else {
@@ -98,7 +97,6 @@ projectSchema.pre('save', function (next) {
             }
         });
     }
-    console.log('this =', this.devices[0].sensors)
     next(/*err*/);
 });
 
