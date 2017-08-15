@@ -374,6 +374,9 @@ export default class _Device extends Component {
         projectUpdated.devices.forEach(d => {
             d.sensors.forEach(s => {
                 if (s._id === sensor._id) {
+                    if (this.state[s._id + 'aperture']) {
+                        s.aperture = this.state[s._id + 'aperture'];
+                    }
                     if (this.state[s._id + 'sensorDataType']) {
                         s.dataType = this.state[s._id + 'sensorDataType'];
                     }
@@ -676,7 +679,7 @@ export default class _Device extends Component {
             return <TableRow key={ s._id + i }>
                 {/*1*/}
                 <TableRowColumn
-                    style={{ overflow: 'visible', paddingLeft: 0, width: '50px' }}
+                    style={{ overflow: 'visible', paddingLeft: 0, paddingRight: 0, width: '50px' }}
                 >
                     { s.editMode ?
                         <IconButton onTouchTap={ () => { this.saveSensor(s); } }><SaveIcon/></IconButton>
@@ -700,11 +703,11 @@ export default class _Device extends Component {
                     </IconButton>
                 </TableRowColumn>
                 {/*2*/}
-                <TableRowColumn style={{ paddingLeft: 0, paddingRight: 0, width: '130px' }}>
+                <TableRowColumn style={{ paddingLeft: 0, paddingRight: 0, width: '110px' }}>
                     <div style={{ display: 'inline-block', textAlign: 'left' }}>
                         <img src={ s.img } alt=""/>
                         <br/>
-                        <strong style={{ fontWeight: 'bold', textTransform: 'uppercase' }} title={ s.title }>
+                        <strong style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }} title={ s.title }>
                             { s.title }
                         </strong>
                     </div>
@@ -732,7 +735,28 @@ export default class _Device extends Component {
                         <MenuItem value={ 'Ом' } primaryText="Ом" />
                     </SelectField>
                 </TableRowColumn>
-                <TableRowColumn style={{ paddingLeft: '10px', width: '54px' }}>
+                <TableRowColumn
+                    style={{ paddingLeft: '0px', paddingRight: 0, width: '64px' }}
+                >
+                    { s.type !== 'дискретный' ? <SelectField
+                        disabled={ !s.editMode }
+                        iconStyle={{ opacity: s.editMode ? 1 : 0, paddingRight: '0px', fill: '#000', textAlign: 'right' }}
+                        underlineStyle={{ opacity: s.editMode ? 1 : 0 }}
+                        onChange={ (event, index, value) => {
+                            this.setState(Object.assign({}, this.state, {
+                                [s._id + 'aperture']: value
+                            }))
+                        } }
+                        name="aperture"
+                        ref={ s._id + 'aperture' }
+                        style={{ width: '64px', verticalAlign: 'bottom' }}
+                        value={ this.state[s._id + 'aperture'] || s.aperture }
+                        defaultValue={ s.aperture }
+                    >
+                        { [0.5,1,2,3,4,5,6,7,8,9,10].map(v => <MenuItem value={ v } primaryText={ v + '%' } />) }
+                    </SelectField> : null }
+                </TableRowColumn>
+                <TableRowColumn style={{ width: '54px' }}>
                     <Checkbox
                         name="sensorHistory"
                         ref={ s._id + 'sensorHistory' }
@@ -746,7 +770,7 @@ export default class _Device extends Component {
                     />
                 </TableRowColumn>
                 {/*4*/}
-                <TableRowColumn style={{ width: '112px'}}>
+                <TableRowColumn style={{ width: '95px'}}>
                     <TextField
                         name="sensorNameShort"
                         ref={ s._id + 'sensorNameShort' }
@@ -763,7 +787,7 @@ export default class _Device extends Component {
                 </TableRowColumn>
                 {/*5*/}
                 <TableRowColumn
-                    style={{ width: '112px'}}>
+                    style={{ width: '95px'}}>
                     <TextField
                         title={ s.name_dispatch }
                         name="sensorNameDispatch"
@@ -802,7 +826,7 @@ export default class _Device extends Component {
                     </SelectField>
                 </TableRowColumn>
                 {/*8*/}
-                <TableRowColumn style={{ width: '60px' }}>
+                <TableRowColumn style={{ width: '50px' }}>
                     <SelectField
                         disabled={ !s.editMode }
                         style={{ width: '65px', verticalAlign: 'bottom' }}
@@ -1130,14 +1154,14 @@ export default class _Device extends Component {
 
                                     <TableRow style={{ verticalAlign: 'middle' }}>
                                         <TableHeaderColumn
-                                            style={{ paddingLeft: 0, width: '50px' }}
+                                            style={{ paddingLeft: 0, paddingRight: 0, width: '50px' }}
                                             rowSpan="2"
                                         >
                                             {/*Редактировать/Сохранить*/}
                                         </TableHeaderColumn>
                                         <TableHeaderColumn rowSpan="2" style={{ paddingLeft: 0, width: '50px' }}></TableHeaderColumn>
                                         <TableHeaderColumn
-                                            style={{ paddingLeft: 0, paddingRight: 0, width: '130px' }}
+                                            style={{ paddingLeft: 0, paddingRight: 0, width: '110px' }}
                                             rowSpan="2" tooltip="Название датчика"
                                         >
                                             Датчик
@@ -1149,14 +1173,21 @@ export default class _Device extends Component {
                                             Единицы <br/>
                                             измерения
                                         </TableHeaderColumn>
+
                                         <TableHeaderColumn
-                                            style={{ paddingLeft: '10px', width: '54px' }}
+                                            style={{ paddingLeft: '0px', paddingRight: 0, width: '64px' }}
+                                            rowSpan="2" tooltip="Апертура (только для анадлговых датчиков)"
+                                        >
+                                            Апертура
+                                        </TableHeaderColumn>
+                                        <TableHeaderColumn
+                                            style={{ width: '54px' }}
                                             rowSpan="2" tooltip="Записывать данные по датчику в историю изменений"
                                         >
                                             Писать в<br/>
                                             историю
                                         </TableHeaderColumn>
-                                        <TableHeaderColumn style={{ width: '272px', textAlign: 'center' }} colSpan="2">
+                                        <TableHeaderColumn style={{ width: '238px', textAlign: 'center' }} colSpan="2">
                                             Наименование
                                         </TableHeaderColumn>
                                         <TableHeaderColumn
@@ -1165,7 +1196,7 @@ export default class _Device extends Component {
                                         >
                                             Тип данных
                                         </TableHeaderColumn>
-                                        <TableHeaderColumn style={{ width: '60px' }} rowSpan="2" tooltip="R - чтение; W - запись; RW - чтение и запись" >
+                                        <TableHeaderColumn style={{ width: '50px' }} rowSpan="2" tooltip="R - чтение; W - запись; RW - чтение и запись" >
                                             Доступ
                                         </TableHeaderColumn>
                                         <TableHeaderColumn colSpan="2" rowSpan="2" tooltip="Список регистров датчика">

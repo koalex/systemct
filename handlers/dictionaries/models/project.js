@@ -27,9 +27,8 @@ const projectSchema = new mongoose.Schema({
                 title: { type: String },
                 img: { type: String },
                 measure: { type: String },
-                advancedSettings: [{
-
-                }],
+                aperture: { type: Number, min: 0.000001 },
+                advancedSettings: [{}],
                 history:  { type: Boolean, default: true, required: true },
                 type: {
                     type: String,
@@ -84,7 +83,7 @@ projectSchema.pre('save', function (next) {
                                 sensor.advancedSettings = [];
                                 next();
                             } else {
-                                let fileds = sensor.registers.concat(['_id', 'color', 'blink', 'emergency', 'state', 'aperture']);
+                                let fileds = sensor.registers.concat(['_id', 'color', 'blink', 'emergency', 'state', 'threshold']);
                                 if (setting._id) setting._id = mongoose.Types.ObjectId();
 
                                 let toDelete = Object.keys(setting).filter(sk => fileds.indexOf(sk) < 0);

@@ -96,7 +96,7 @@ class SensorAdvancedSettings extends Component {
         let _id = 'newRule' + Object.keys(nextState.settings).length;
         nextState.settings[_id] = {
             _id,
-            aperture: null,
+            threshold: null,
             color: '#008b02',
             state: null,
             emergency: null,
@@ -164,9 +164,9 @@ class SensorAdvancedSettings extends Component {
         this.setState(nextState);
     };
 
-    apertureChange = (ruleId, apertureValue) => {
+    thresholdChange = (ruleId, thresholdValue) => {
         let nextState = Object.assign({}, this.state);
-            nextState.settings[ruleId].aperture = apertureValue;
+            nextState.settings[ruleId].threshold = thresholdValue;
         this.setState(nextState);
     };
 
@@ -229,14 +229,14 @@ class SensorAdvancedSettings extends Component {
                 cols.push(<TableRowColumn>
                     <SelectField
                         style={{ width: '65px' }}
-                        name={ rule._id + 'aperture' }
-                        value={ rule.aperture }
+                        name={ rule._id + 'threshold' }
+                        value={ rule.threshold }
                         onChange={ (event, index, value) => {
-                            this.apertureChange(rule._id, value);
+                            this.thresholdChange(rule._id, value);
                         } }
                     >
                         <MenuItem value={ null } primaryText="" />
-                        { [0.5,1,2,3,4,5,6,7,8,9,10].map(ap => <MenuItem value={ ap } primaryText={ ap + '%' } />) }
+                        { [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,-0.5,0.5,1,2,3,4,5,6,7,8,9,10].map(v => <MenuItem value={ v } primaryText={ v + '%' } />) }
                     </SelectField>
                 </TableRowColumn>);
             }
@@ -312,13 +312,13 @@ class SensorAdvancedSettings extends Component {
 
         if (registersExist) {
             tableHeaderColumns = this.props.sensor.registers.map(r => {
-                return (<TableHeaderColumn tooltip={ 'Значение регистра ' + r + ' с учётом апертуры (апертура НЕ учитывается для дискретных датчиков)' } style={{ fontWeight: 'bold' }}>
+                return (<TableHeaderColumn tooltip={ 'Значение регистра ' + r + ' с учётом порога срабатывания (порог НЕ учитывается для дискретных датчиков)' } style={{ fontWeight: 'bold' }}>
                     Регистр: { r }
                 </TableHeaderColumn>)
             });
 
             if (this.props.sensor.type !== 'дискретный') {
-                tableHeaderColumns.push(<TableHeaderColumn tooltip="Апертура">Апертура</TableHeaderColumn>);
+                tableHeaderColumns.push(<TableHeaderColumn tooltip="Порог срабатывания">Порог <br/>срабатывания</TableHeaderColumn>);
             }
             tableHeaderColumns.push(<TableHeaderColumn tooltip="Цвет">Цвет</TableHeaderColumn>);
             tableHeaderColumns.push(<TableHeaderColumn tooltip="Мигание" style={{ paddingLeft: 0 }}>Мигание</TableHeaderColumn>);
@@ -338,7 +338,7 @@ class SensorAdvancedSettings extends Component {
                     { genBodyRowColumns(this.state.settings[settingId], settingId) }
                 </TableRow>;
             });
-            /*tableBody = [{ _id: 'sljfdnjvn3424', '2048': 123, '2050': 777, aperture: 10, color: '#db3e00', blink: false, emergency: true, state: 'Выключен' }].map(rule => {
+            /*tableBody = [{ _id: 'sljfdnjvn3424', '2048': 123, '2050': 777, threshold: 10, color: '#db3e00', blink: false, emergency: true, state: 'Выключен' }].map(rule => {
                 return <TableRow style={{ verticalAlign: 'top' }} key={ rule._id }>
                     { genBodyRowColumns(rule) }
                 </TableRow>;
