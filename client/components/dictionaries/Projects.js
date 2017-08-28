@@ -753,7 +753,7 @@ export default class _Device extends Component {
                         value={ this.state[s._id + 'aperture'] || s.aperture }
                         defaultValue={ s.aperture }
                     >
-                        { [0.5,1,2,3,4,5,6,7,8,9,10].map(v => <MenuItem value={ v } primaryText={ v + '%' } />) }
+                        { [0.5,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(v => <MenuItem value={ v } primaryText={ v + '%' } />) }
                     </SelectField> : null }
                 </TableRowColumn>
                 <TableRowColumn style={{ width: '54px' }}>

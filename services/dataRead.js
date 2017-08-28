@@ -12,10 +12,11 @@ if (semver.lt(semver.clean(process.versions.node), '7.9.0') || parseFloat(proces
     process.exit();
 }
 
-const modbus        = require('jsmodbus');
-const Project       = require('../handlers/dictionaries/models/project');
-const ProjectData   = require('../handlers/dictionaries/models/projectData');
-const IEEE754       = require('../libs/IEEE754');
+const modbus            = require('jsmodbus');
+const Project           = require('../handlers/dictionaries/models/project');
+const ProjectDataLog    = require('../handlers/dictionaries/models/projectDataLog'); // все логи
+const ProjectData       = require('../handlers/dictionaries/models/projectData'); // логи изменений
+const IEEE754           = require('../libs/IEEE754');
 
 require('../libs/mongoose');
 
@@ -27,188 +28,154 @@ async function service () {
     let projects = await Project.find({ active: true });
 
 
-    if (!projects.length) {
-        setTimeout(service, 1000);
-        return;
-    }
+    if (!projects.length) return setTimeout(service, 1000);
+
+    let promises = [];
 
     for (let i = 0, l = projects.length; i < l; i++) {
 
         if (!Array.isArray(projects[i].devices)) continue;
 
-        for (let ii = 0, ll = projects[i].devices.length; ii < ll; ii++) {
-            let device = projects[i].devices[ii];
-            if (!devicesClients[device._id]) devicesClients[device._id] = {};
-
-            if (!devicesClients[device._id].client) {
-                devicesClients[device._id].client = modbus.client.tcp.complete({
-                    'host'              : device.ip,
-                    'port'              : device.port,
-                    'autoReconnect'     : false,
-                    'reconnectTimeout'  : 500,
-                    'timeout'           : 500,
-                    'unitId'            : 1
-                }).connect();
-
-                if (!Array.isArray(device.sensors) || !device.sensors.length) continue;
-
-                let promises = [];
-
-                // devicesClients[device._id].client.on('error', err => {});
-                devicesClients[device._id].client.on('connect', () => {
-                    if (devicesClients[device._id].reading) return;
-
-                    device.sensors.forEach(sensor => {
-                        if (Array.isArray(sensor.registers) && sensor.registers.length) {
-
-                            devicesClients[device._id].reading = true;
-
-                            sensor.registers.forEach(r => {
-                                promises.push(
-                                    devicesClients[device._id].client.readHoldingRegisters(r, IEEE754[sensor.dataType].bits / 16)
-                                        .then(resp => {
-                                            let data = new ProjectData({
-                                                p_id: projects[i]._id,
-                                                d_id: device._id,
-                                                s_id: sensor._id,
-                                                r: r,
-                                                r_v: IEEE754[sensor.dataType].parse(resp)
-                                            });
-
-                                            return data.save().then(
-                                                () => true,
-                                                err => true
-                                            );
-                                        },
-                                        err => true)
-                                )
-                            });
-
-                        }
-                    });
-
-                    Promise.all(promises).then(() => {
-                        devicesClients[device._id].reading = false;
-                        setTimeout(service, readTimeout);
-                    }, () => {
-                        devicesClients[device._id].reading = false;
-                        setTimeout(service, readTimeout);
-                    });
-
-                });
-
-            } else if (devicesClients[device._id].client && 'error' === devicesClients[device._id].client.getState()) {
-                // TODO: if connection error ?
-                // client.reconnect() ?
-                devicesClients[device._id].client.close();
-                devicesClients[device._id].client  = null;
-                devicesClients[device._id].reading = false;
-                setTimeout(service, readTimeout);
-            } else if (['closed', 'ready', 'waiting'].some(v => v === devicesClients[device._id].client.getState())) {
-                if (devicesClients[device._id].reading) continue;
-                if (!Array.isArray(device.sensors) || !device.sensors.length) continue;
-                let promises = [];
-
-                device.sensors.forEach(sensor => {
-                    if (Array.isArray(sensor.registers) && sensor.registers.length) {
-
-                        devicesClients[device._id].reading = true;
-
-                        sensor.registers.forEach(r => {
-                            promises.push(
-                                new Promise((resolve, reject) => {
-                                    devicesClients[device._id].client.readHoldingRegisters(r, IEEE754[sensor.dataType].bits / 16)
-                                        .then(resp => {
-                                                let data = new ProjectData({
-                                                    p_id: projects[i]._id,
-                                                    d_id: device._id,
-                                                    s_id: sensor._id,
-                                                    r: r,
-                                                    r_v: IEEE754[sensor.dataType].parse(resp)
-                                                });
-
-                                                data.save().then(
-                                                    () => {
-                                                        resolve();
-                                                    },
-                                                    err => {
-                                                        resolve();
-                                                    }
-                                                );
-                                            },
-                                            err => {
-                                                resolve();
-                                            })
-                                })
-                            )
-                        });
-
-                    }
-                });
-
-                Promise.all(promises).then(() => {
-                    devicesClients[device._id].reading = false;
-                    setTimeout(service, readTimeout);
-                }, () => {
-                    devicesClients[device._id].reading = false;
-                    setTimeout(service, readTimeout);
-                });
-            } else if (devicesClients[device._id].client && devicesClients[device._id].client.getState() === 'connect') {
-                if (devicesClients[device._id].reading) continue;
-                if (!Array.isArray(device.sensors) || !device.sensors.length) continue;
-                let promises = [];
-
-                device.sensors.forEach(sensor => {
-                    if (Array.isArray(sensor.registers) && sensor.registers.length) {
-
-                        devicesClients[device._id].reading = true;
-
-                        sensor.registers.forEach(r => {
-                            promises.push(
-                                new Promise((resolve, reject) => {
-                                    devicesClients[device._id].client.readHoldingRegisters(r, IEEE754[sensor.dataType].bits / 16)
-                                        .then(resp => {
-                                                let data = new ProjectData({
-                                                    p_id: projects[i]._id,
-                                                    d_id: device._id,
-                                                    s_id: sensor._id,
-                                                    r: r,
-                                                    r_v: IEEE754[sensor.dataType].parse(resp)
-                                                });
-
-                                                data.save().then(
-                                                    () => {
-                                                        resolve();
-                                                    },
-                                                    err => {
-                                                        resolve();
-                                                    }
-                                                );
-                                            },
-                                            err => {
-                                                resolve();
-                                            })
-                                })
-                            )
-                        });
-
-                    }
-                });
-
-                Promise.all(promises).then(() => {
-                    devicesClients[device._id].reading = false;
-                    setTimeout(service, readTimeout);
-                }, () => {
-                    devicesClients[device._id].reading = false;
-                    setTimeout(service, readTimeout);
-                });
-            } else {
-                setTimeout(service, readTimeout);
-            }
-        }
+        promises.push(inProject(projects[i]));
 
     }
 
+    try {
+        await Promise.all(promises);
+    } catch (err) {
+        console.error(err);
+    }
+
+    setTimeout(service, 1000);
 }
 
 service();
+
+async function inProject (project) {
+    let pId         = project._id;
+    let promises    = [];
+
+    for (let i = 0, l = project.devices.length; i < l; i++) {
+        promises.push(inDevice(pId, project.devices[i]));
+    }
+
+    await Promise.all(promises);
+}
+
+async function inDevice (projectId, device) {
+    if (!devicesClients[device._id]) devicesClients[device._id] = {};
+
+    if (!devicesClients[device._id].client) {
+        devicesClients[device._id].client = modbus.client.tcp.complete({
+            'host'              : device.ip,
+            'port'              : device.port,
+            'autoReconnect'     : false,
+            'reconnectTimeout'  : 500,
+            'timeout'           : 500,
+            'unitId'            : 1
+        }).connect();
+
+    } else if (devicesClients[device._id].client && 'error' === devicesClients[device._id].client.getState()) {
+        // TODO: if connection error ?
+        // client.reconnect() ?
+        devicesClients[device._id].client.close();
+        devicesClients[device._id].client  = null;
+        devicesClients[device._id].reading = false;
+        setTimeout(service, readTimeout);
+    } else if (['closed', 'ready', 'waiting'].some(v => v === devicesClients[device._id].client.getState())) {
+        if (devicesClients[device._id].reading) return;
+
+        if (!Array.isArray(device.sensors) || !device.sensors.length) return;
+
+        for (let i = 0, l = device.sensors.length; i < l; i++) await inSensor(projectId, device._id, device.sensors[i]);
+
+        devicesClients[device._id].reading = false;
+
+    } else if (devicesClients[device._id].client && devicesClients[device._id].client.getState() === 'connect') {
+        if (devicesClients[device._id].reading) return;
+
+        if (!Array.isArray(device.sensors) || !device.sensors.length) return;
+
+        for (let i = 0, l = device.sensors.length; i < l; i++) {
+            await inSensor(projectId, device._id, device.sensors[i])
+        }
+
+        devicesClients[device._id].reading = false;
+    }
+}
+
+async function inSensor (projectId, deviceId, sensor) {
+    if (Array.isArray(sensor.registers) && sensor.registers.length) {
+
+        devicesClients[deviceId].reading = true;
+
+        for (let i = 0, l = sensor.registers.length; i < l; i++) {
+            let r = sensor.registers[i];
+
+            let response = await new Promise((resolve, reject) => {
+                devicesClients[deviceId].client.readHoldingRegisters(r, IEEE754[sensor.dataType].bits / 16)
+                    .then(resp => { resolve(IEEE754[sensor.dataType].parse(resp)); }, err => { resolve(); }); // FIXME: что делать если ошибка чтения регистра? Сейчас просто идём дальше.
+            });
+
+            if (!response) continue;
+
+            if (sensor.history) {
+                let lastData = await ProjectData.findOne({
+                    p_id: projectId,
+                    d_id: deviceId,
+                    s_id: sensor._id
+                }).sort({ dt: -1 });
+
+                if (!lastData) {
+                    let data = new ProjectData({
+                        p_id: projectId,
+                        d_id: deviceId,
+                        s_id: sensor._id,
+                        r: r,
+                        r_v: response
+                    });
+
+                    await data.save();
+                } else if ('дискретный' === sensor.type && lastData.r_v != response) {
+                    let data = new ProjectData({
+                        p_id: projectId,
+                        d_id: deviceId,
+                        s_id: sensor._id,
+                        r: r,
+                        r_v: response
+                    });
+
+                    await data.save();
+                } else if ('числовой' === sensor.type && lastData.r_v != response) {
+                    let lastDataApPositive = lastData.r_v + ((lastData.r_v / 100) * sensor.aperture);
+                    let lastDataApNegative = lastData.r_v - ((lastData.r_v / 100) * sensor.aperture);
+
+                    if (response > lastDataApPositive || response < lastDataApNegative) {
+                        let data = new ProjectData({
+                            p_id: projectId,
+                            d_id: deviceId,
+                            s_id: sensor._id,
+                            r: r,
+                            r_v: response
+                        });
+
+                        await data.save();
+                    }
+                }
+
+            }
+
+            let data = new ProjectDataLog({
+                p_id: projectId,
+                d_id: deviceId,
+                s_id: sensor._id,
+                r: r,
+                r_v: response
+            });
+
+            await data.save();
+        }
+
+    }
+}
+
