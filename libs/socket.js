@@ -22,6 +22,7 @@ const acceptLanguage = require('accept-language');
 const User           = require('../handlers/user/models/user');
 const jwt            = require('jsonwebtoken');
 const BlackList      = require('../handlers/auth/models/blacklist');
+const AT             = require('../client/actions/constants');
 
 const socketPrefix   = 'S_';
 
@@ -52,7 +53,7 @@ stats.forEach(stat => {
                 socketRoutes.push(router)
             }
         } catch (err) {
-            console.error(err);
+            // console.error(err);
         }
     }
 });
@@ -147,11 +148,43 @@ function Socket (server) {
         socket.join(socket.user.role); // TODO: on signout leave, on change role leave
         socket.on('changeLocale', locale => { i18n.setLocale(locale); });
 
+        socket.on(AT.CHANGELOG + AT._JOIN, data => {
+            if (data.projectId && data.deviceId && Array.isArray(data.sensorsId) && data.sensorsId.length) {
+                for (let i = 0, l = data.sensorsId.length; i < l; i++) {
+                    socket.join(AT.CHANGELOG + data.projectId + data.deviceId + data.sensorsId[i]);
+                }
+            }
+        });
+
+        socket.on(AT.LOG + AT._JOIN, data => {
+            if (data.projectId && data.deviceId && Array.isArray(data.sensorsId) && data.sensorsId.length) {
+                for (let i = 0, l = data.sensorsId.length; i < l; i++) {
+                    socket.join(AT.LOG + data.projectId + data.deviceId + data.sensorsId[i]);
+                }
+            }
+        });
+
+        socket.on(AT.CHANGELOG + AT._LEAVE, data => {
+            if (data.projectId && data.deviceId && Array.isArray(data.sensorsId) && data.sensorsId.length) {
+                for (let i = 0, l = data.sensorsId.length; i < l; i++) {
+                    socket.leave(AT.CHANGELOG + data.projectId + data.deviceId + data.sensorsId[i]);
+                }
+            }
+        });
+
+        socket.on(AT.LOG + AT._LEAVE, data => {
+            if (data.projectId && data.deviceId && Array.isArray(data.sensorsId) && data.sensorsId.length) {
+                for (let i = 0, l = data.sensorsId.length; i < l; i++) {
+                    socket.leave(AT.LOG + data.projectId + data.deviceId + data.sensorsId[i]);
+                }
+            }
+        });
+
         socketRoutes.forEach(route => {
             route({ nsp: apiNsp, token, socket, adapter: Socket });
         });
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', () => { // FIXME: leave
 
             (async () => {
                 try {

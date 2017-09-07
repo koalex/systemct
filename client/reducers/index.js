@@ -9,5 +9,7 @@ import ugo                  from './ugo';
 import sensors              from './sensors';
 import devices              from './devices';
 import projects             from './projects';
+import changelog            from './changelog';
+import charts               from './charts';
 
-export default combineReducers({ common, auth, users, ugo, sensors, devices, projects, modal });
+export default combineReducers({ common, auth, users, ugo, sensors, devices, projects, modal, changelog, charts });

@@ -122,7 +122,7 @@ export default class App extends Component {
                         </MenuItem>
                     </Link>
                 </Drawer>
-                <div className={styles['main-content']}>
+                <div id="appContent" className={styles['main-content']}>
                     { this.props.children }
                 </div>
             </div>

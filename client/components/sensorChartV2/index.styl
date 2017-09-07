@@ -1,0 +1,93 @@
+@charset "UTF-8";
+
+/*
+  Author: ✰ Konstantin Aleksandrov ✰ https://github.com/koalex
+
+  File Structure :
+    1.  Name
+    	1.1. Sub-name
+*/
+
+/************************
+  1. Name
+************************/
+
+/* 1.1  Sub-name */
+
+borderWidth = 1px
+
+:local(.sensor-chart)
+  display inline-block
+  min-height 250px
+  border borderWidth dashed #ccc
+  box-sizing border-box
+  border-bottom none
+  border-right none
+
+:local(.sensor-chart:nth-child(odd)) // нечетные
+  border-left none
+:local(.sensor-chart:nth-child(even)) // четные
+  border-left borderWidth dashed #ccc
+
+:local(.sensor-chart__header)
+  display flex
+  flex-direction column
+  justify-content space-between
+  align-items center
+  width 100%
+  height 50px
+  overflow visible
+
+:local(.sensor-chart__sensors-selector)
+  position absolute !important
+  top 0
+  left 0
+  width 48px !important
+  height 48px !important
+  opacity 0
+
+:local(.sensor-chart__body)
+  position relative
+  min-height 130px
+
+:local(.sensor-chart__body-refresh)
+  position absolute
+  top calc(50% - 20px)
+  left calc(50% - 20px)
+
+:local(.need-refresh)
+  pointer-events none
+  opacity 0.3
+
+:local(.error)
+  background-color #FFCDD2
+
+:local(.emergency)
+  background-color #fff0f2
+
+:local(.blink)
+  opacity 1
+  //transition opacity 1
+  animation-name blink
+  animation-duration 1s
+  animation-iteration-count infinite
+
+@keyframes blink
+  0%
+    opacity 1
+  50%
+    opacity 0
+  100%
+    opacity 1
+
+:local(.chart-tooltip)
+  padding 10px
+  color #fff
+  border-radius 4px
+
+:local(.chart-tooltip__label)
+  font-weight bold
+  font-size 14px
+
+:local(.chart-tooltip__payload)
+  font-weight bold

@@ -228,15 +228,16 @@ class SensorAdvancedSettings extends Component {
             if (this.props.sensor.type !== 'дискретный') {
                 cols.push(<TableRowColumn>
                     <SelectField
-                        style={{ width: '65px' }}
+                        iconStyle={{ display: 'none' }}
+                        style={{ width: '100px' }}
                         name={ rule._id + 'threshold' }
                         value={ rule.threshold }
                         onChange={ (event, index, value) => {
                             this.thresholdChange(rule._id, value);
                         } }
                     >
-                        <MenuItem value={ null } primaryText="" />
-                        { [-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,-0.5,0.5,1,2,3,4,5,6,7,8,9,10].map(v => <MenuItem value={ v } primaryText={ v + '%' } />) }
+                        <MenuItem value={ 0 } primaryText="0" />
+                        { [0.5,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(v => <MenuItem value={ v } primaryText={ '+-' + v + '%' } />) }
                     </SelectField>
                 </TableRowColumn>);
             }

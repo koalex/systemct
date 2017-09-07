@@ -13,14 +13,18 @@ if (semver.lt(semver.clean(process.versions.node), '7.9.0') || parseFloat(proces
 }
 
 const modbus            = require('jsmodbus');
+const moment            = require('moment');
 const Project           = require('../handlers/dictionaries/models/project');
-const ProjectDataLog    = require('../handlers/dictionaries/models/projectDataLog'); // все логи
-const ProjectData       = require('../handlers/dictionaries/models/projectData'); // логи изменений
+const ProjectDataLog    = require('../handlers/logs/models/log'); // все логи
+const ProjectData       = require('../handlers/logs/models/changeLog'); // логи изменений
 const IEEE754           = require('../libs/IEEE754');
+const Socket            = require('../libs/socket');
+const AT                = require('../client/actions/constants');
 
 require('../libs/mongoose');
 
 const readTimeout  = 1000; // ms
+const readDelay    = 1000;
 let devicesClients = {};
 
 async function service () {
@@ -46,7 +50,7 @@ async function service () {
         console.error(err);
     }
 
-    setTimeout(service, 1000);
+    setTimeout(service, readDelay);
 }
 
 service();
@@ -117,7 +121,7 @@ async function inSensor (projectId, deviceId, sensor) {
                     .then(resp => { resolve(IEEE754[sensor.dataType].parse(resp)); }, err => { resolve(); }); // FIXME: что делать если ошибка чтения регистра? Сейчас просто идём дальше.
             });
 
-            if (!response) continue;
+            if (null === response || undefined === response) continue;
 
             if (sensor.history) {
                 let lastData = await ProjectData.findOne({
@@ -125,7 +129,6 @@ async function inSensor (projectId, deviceId, sensor) {
                     d_id: deviceId,
                     s_id: sensor._id
                 }).sort({ dt: -1 });
-
                 if (!lastData) {
                     let data = new ProjectData({
                         p_id: projectId,
@@ -135,7 +138,10 @@ async function inSensor (projectId, deviceId, sensor) {
                         r_v: response
                     });
 
+
                     await data.save();
+
+                    Socket.emitter.volatile.of('/api').to(AT.CHANGELOG + projectId + deviceId + sensor._id).emit(AT.CHANGELOG + AT.DATA + AT._READ + AT._SUCCESS, JSON.parse(JSON.stringify(data)));
                 } else if ('дискретный' === sensor.type && lastData.r_v != response) {
                     let data = new ProjectData({
                         p_id: projectId,
@@ -144,11 +150,11 @@ async function inSensor (projectId, deviceId, sensor) {
                         r: r,
                         r_v: response
                     });
-
                     await data.save();
+                    Socket.emitter.volatile.of('/api').to(AT.CHANGELOG + projectId + deviceId + sensor._id).emit(AT.CHANGELOG + AT.DATA + AT._READ + AT._SUCCESS, JSON.parse(JSON.stringify(data)));
                 } else if ('числовой' === sensor.type && lastData.r_v != response) {
-                    let lastDataApPositive = lastData.r_v + ((lastData.r_v / 100) * sensor.aperture);
-                    let lastDataApNegative = lastData.r_v - ((lastData.r_v / 100) * sensor.aperture);
+                    let lastDataApPositive = lastData.r_v + ((lastData.r_v / 100) * (sensor.aperture || 1));
+                    let lastDataApNegative = lastData.r_v - ((lastData.r_v / 100) * (sensor.aperture || 1));
 
                     if (response > lastDataApPositive || response < lastDataApNegative) {
                         let data = new ProjectData({
@@ -160,6 +166,12 @@ async function inSensor (projectId, deviceId, sensor) {
                         });
 
                         await data.save();
+                        Socket.emitter.volatile.of('/api').to(AT.CHANGELOG + projectId + deviceId + sensor._id).emit(AT.CHANGELOG + AT.DATA + AT._READ + AT._SUCCESS, JSON.parse(JSON.stringify(data)));
+                    } else {
+                        let res = JSON.parse(JSON.stringify(lastData));
+                        // FIXME: UTC
+                        // delete res.dt;
+                        Socket.emitter.volatile.of('/api').to(AT.CHANGELOG + projectId + deviceId + sensor._id).emit(AT.CHANGELOG + AT.DATA + AT._READ + AT._SUCCESS, res);
                     }
                 }
 
@@ -174,6 +186,8 @@ async function inSensor (projectId, deviceId, sensor) {
             });
 
             await data.save();
+
+            Socket.emitter.volatile.of('/api').to(AT.LOG + projectId + deviceId + sensor._id).emit(AT.LOG + AT.DATA + AT._READ + AT._SUCCESS, JSON.parse(JSON.stringify(data)));
         }
 
     }

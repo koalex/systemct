@@ -1,48 +1,62 @@
 'use strict';
 
-import { LOGS, DICTIONARY, SENSOR, DEVICE, PROJECT, _CREATE, _READ, _UPDATE, _DELETE, _SELECT, _EXPORT, _IMPORT, _SUCCESS, _ERROR } from '../actions/constants';
+import * as AT from '../actions/constants';
 
-const initialState = {
-    isLoading: false,
-    error: false,
-    errors: {},
-    selectedProjectId: null,
-    selectedDeviceId: null,
-    selectedSensorId: null,
-    log: []
+const init = {
+    data: [],
+    errors: {}
 };
 
-export default function (state = initialState, action) {
-    const { data, payload, type, ...rest } = action;
-
-    // let nextState;
+export default function (state = init, action) {
+    const { type, payload, ...rest } = action;
 
     switch(type) {
-        default: return state;
 
-        case PROJECT + _SELECT:
+        case AT.LOG + AT._READ:
             return Object.assign({}, state, {
-                isLoading: false,
+                isLoading: true,
                 error: false,
-                errors: {},
-                selectedProjectId:  data._id,
-                selectedDeviceId: null,
-                selectedSensorId: null,
-                log: []
+                errors: {}
             });
+            break;
+        case AT.LOG + AT._READ + AT._SUCCESS:
+            return Object.assign({}, state, initialState);
+            break;
+        case AT.LOG + AT._READ + AT._ERROR:
+            const { payload } = rest;
 
-        break;
+            let nextState = { errors: {}, isLoading: false };
 
-        case DEVICE + _SELECT:
-            return Object.assign({}, state, {
-                isLoading: false,
-                error: false,
-                errors: {},
-                selectedDeviceId: data._id,
-                selectedSensorId: null,
-                log: []
-            });
+            if (Array.isArray(payload)) {
+                payload.forEach(data => {
+                    if (data.field && data.message) {
+                        nextState.errors[data.field] = data.message;
+                    }
+                });
+                return Object.assign({}, state, nextState)
+            } else if (rest.payload.field && rest.payload.message) {
+                return Object.assign({}, state, {
+                    errors: {
+                        [rest.payload.field]: rest.payload.message
+                    }
+                })
+            } else if (rest.payload.message) {
+                nextState.error = rest.payload.message;
+                return Object.assign({}, state, nextState)
+            } else {
+                return Object.assign({}, state, {
+                    error: rest.payload
+                })
+            }
 
             break;
+        case _ERROR + _CLEAR:
+            return Object.assign({}, state, {
+                error: false,
+                errors: {}
+            });
+            break;
+
+        default: return state
     }
 }

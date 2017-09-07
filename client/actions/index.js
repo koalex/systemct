@@ -3,14 +3,20 @@
 import {
     AUTH,
     _IMPORT,
+    _SYNC,
     _EXPORT,
     _CHECK,
     SIGNOUT,
     MODAL,
+    INTERPOLATE,
     _SHOW,
     _HIDE,
     _CHANGE,
     _SELECT,
+    CHANGELOG,
+    CHART,
+    VIEWMODE,
+    DATA,
     SIGNIN, USERS, DICTIONARY, UGO, SENSOR, DEVICE, PROJECT, _READ, _CREATE, _UPDATE, _DELETE, INPUT_CHANGE } from './constants';
 
 export function dispatch (data) {
@@ -565,6 +571,93 @@ export function modalShow (data) {
 export function modalHide (data) {
     return {
         type: MODAL + _HIDE,
+        data
+    }
+}
+
+export function chartProjectDeviceSelect (opts) {
+    return {
+        type: CHART + DEVICE + _SELECT,
+        data: {
+            projectId: opts.projectId,
+            deviceId: opts.deviceId,
+            sensors: opts.sensors
+        }
+    };
+}
+
+export function chartAdd () {
+    return {
+        type: CHART + _CREATE,
+    }
+}
+
+export function chartRemove (chartId) {
+    return {
+        type: CHART + _DELETE,
+        data: {
+            chartId
+        }
+    }
+}
+
+export function changeLogRead (data) {
+    return {
+        type: CHANGELOG + _READ,
+        CALL_API: {
+            endpoint: `/api/${data.dataSource == 'changelog' ? 'changelog' : 'log'}/${data.projectId}/${data.deviceId}?sensors=${JSON.stringify(data.sensors)}&from=${data.from}&to=${data.to}`,
+            method: 'GET'
+        },
+        data
+    }
+}
+
+export function chartSync () {
+    return {
+        type: CHART + _SYNC
+    }
+}
+
+export function changeViewMode (mode) {
+    return {
+        type: CHART + VIEWMODE + _CHANGE,
+        data:{mode}
+
+    }
+}
+
+export function changeChartsSettings (data) {
+    return {
+        type: CHART + _CHANGE,
+        data
+
+    }
+}
+
+export function selectChartSensors (data) {
+    // (ev, v)
+    return {
+        type: CHART + SENSOR + _SELECT,
+        data: {
+            chartId: data.chartId,
+            sensorsId: data.sensorsId
+        }
+    }
+}
+
+export function toggleChartInterpolate (chartId) {
+    // (ev, v)
+    return {
+        type: CHART + INTERPOLATE + _CHANGE,
+        data: {
+            chartId: chartId
+        }
+    }
+}
+
+export function chartsDataUpdate (data) {
+    return {
+        type: CHART + DATA + _UPDATE,
         data
     }
 }

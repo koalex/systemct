@@ -15,6 +15,9 @@ const _CHANGE         = '_CHANGE';
 const _SELECT         = '_SELECT';
 const _IMPORT         = '_IMPORT';
 const _EXPORT         = '_EXPORT';
+const _JOIN           = '_JOIN';
+const _LEAVE          = '_LEAVE';
+const _SYNC           = '_SYNC';
 
 const AUTH            = 'AUTH:';
 const USERS           = 'USERS:';
@@ -23,9 +26,14 @@ const UGO             = 'UGO:';
 const SENSOR          = 'SENSOR:';
 const DEVICE          = 'DEVICE:';
 const PROJECT         = 'PROJECT:';
-const LOGS            = 'LOGS:';
+const CHART           = 'CHART:';
+const LOG             = 'LOG:';
+const CHANGELOG       = 'CHANGELOG:';
+const DATA            = 'DATA:';
 const MODAL           = 'MODAL:';
+const INTERPOLATE     = 'INTERPOLATE:';
 const ACTIVITY        = 'ACTIVITY:';
+const VIEWMODE        = 'VIEWMODE:'
 
 const INPUT_CHANGE   = 'INPUT_CHANGE';
 const SIGNIN         = 'SIGNIN';
@@ -47,6 +55,9 @@ module.exports = {
     _SELECT,
     _IMPORT,
     _EXPORT,
+    _JOIN,
+    _LEAVE,
+    _SYNC,
 
     AUTH,
     USERS,
@@ -55,9 +66,14 @@ module.exports = {
     SENSOR,
     DEVICE,
     PROJECT,
-    LOGS,
+    CHART,
+    LOG,
+    CHANGELOG,
+    DATA,
     ACTIVITY,
+    VIEWMODE,
     MODAL,
+    INTERPOLATE,
 
     INPUT_CHANGE,
     SIGNIN,
