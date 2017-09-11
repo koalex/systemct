@@ -425,6 +425,7 @@ export default class Charts extends Component {
                 width={w} height={h} />
         });
 
+        const syncEnabled = false;
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', flexGrow: '1' }}>
@@ -579,15 +580,13 @@ export default class Charts extends Component {
                         />
                         &nbsp;
                         &nbsp;
-                        <RaisedButton
+                        {syncEnabled ? <RaisedButton
                             disabled={!sensors || !sensors.length}
                             onClick={() => { this.props.chartSync() }}
                             label=""
                             primary={ this.props.charts.sync }
                             icon={<SyncIcon style={{ position: 'relative', top: '-2px' }}/>}
-                        />
-                        &nbsp;
-                        &nbsp;
+                        /> : null }
                         <RaisedButton
                             disabled={this.props.charts.realtime || !sensors || !sensors.length}
                             onClick={() => { this.props.chartAdd() }}

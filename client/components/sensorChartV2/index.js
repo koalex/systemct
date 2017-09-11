@@ -95,7 +95,7 @@ const chartBody = ({syncId, lines, lineType, legendPayload, data, timeFormatStr,
             <XAxis minTickGap={50} dataKey="dt" tickFormatter={tick => {
                 return moment(tick).format(timeFormatStr);
             }}/>
-            <YAxis domain={lineType == 'step' ? ['dataMin - 1', 'dataMax + 1'] : ['auto', 'auto']}/>
+            <YAxis tick={lineType == 'step' ? false : true} domain={lineType == 'step' ? ['dataMin - 0.2', 'dataMax + 0.2'] : ['auto', 'auto']}/>
 
             <CartesianGrid strokeDasharray="3 3" />
             <Tooltip
@@ -300,7 +300,7 @@ const SensorChartV2 = ({ _id, syncId, interpolate, toggleInterpolate, submit, re
                     id: i,
                     color: colors[i] || red500
                 });
-                return <Line isAnimationActive={true} dot={<LineDot/>} connectNulls={true} key={r} legendType="rect"
+                return <Line isAnimationActive={false} dot={<LineDot/>} connectNulls={true} key={r} legendType="rect"
                              type={lineType} dataKey={'Регистр ' + r} stroke={colors[i] || red500} activeDot={{r: 6}}/>;
                 {/*return <Line isAnimationActive={!self.state.chartSettings.realtime} connectNulls={true} key={r} dot={<LineDot/>} legendType="rect" type={lineType} dataKey={'Регистр ' + r} stroke={colors[i] || red500} activeDot={{ r: 6 }} />*/
                 }
@@ -353,7 +353,25 @@ const SensorChartV2 = ({ _id, syncId, interpolate, toggleInterpolate, submit, re
                             }}>
                                 {chartTitle}
                             </p>
-                            <div>
+                                <div>
+
+                                {/*<FloatingActionButton
+                                    onClick={submit}
+                                    disabled={disabled || !selectedSensorsId.length || isLoading}
+                                    mini={true}
+                                >
+                                    <RefreshIcon/>
+                                </FloatingActionButton>*/}
+
+                                <IconButton
+                                    onClick={submit}
+                                    disabled={disabled || !selectedSensorsId.length || isLoading}
+                                    tooltipPosition="bottom-left"
+                                    tooltip="ОБНОВИТЬ ГРАФИК"
+                                >
+                                    <RefreshIcon color={cyan500}/>
+                                </IconButton>
+
                                 { advanced({disabled: false, interpolate, toggleInterpolate}) }
                                 <IconButton
                                     style={{verticalAlign: 'top'}}
@@ -389,14 +407,7 @@ const SensorChartV2 = ({ _id, syncId, interpolate, toggleInterpolate, submit, re
                             left={(width / 2) - 20}
                             top={(parseInt(chartBodyHeight) / 2) - 20}
                             status="loading"
-                        /> : (needRefresh || !data.length) ? <FloatingActionButton
-                            onClick={submit}
-                            disabled={disabled || !selectedSensorsId.length}
-                            className={ styles['sensor-chart__body-refresh'] }
-                            mini={true}
-                        >
-                            <RefreshIcon/>
-                        </FloatingActionButton> : null
+                        /> : null
                     }
                     { chartBody({
                         syncId,
