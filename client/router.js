@@ -26,7 +26,7 @@ import Projects                                                 from './componen
 import Charts                                                 from './containers/Charts';
 import { authCheck/*, dictionaryCreate, dictionaryRead*/ }      from './actions';
 
-import io                                                   from 'socket.io-client/socket.io.min.js';
+import io                                                   from 'socket.io-client';
 const socketPublic  = io.connect('/', { 'transports': ['websocket'] });
 let socketAPI;
 
