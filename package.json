@@ -120,9 +120,7 @@
     "swagger-ui": "^3.0.2",
     "tar-fs": "^1.15.3",
     "uuid": "^3.0.1",
-    "whatwg-fetch": "^2.0.3"
-  },
-  "devDependencies": {
+    "whatwg-fetch": "^2.0.3",
     "assets-webpack-plugin": "^3.5.0",
     "autoprefixer": "^6.5.3",
     "babel-core": "^6.24.1",
